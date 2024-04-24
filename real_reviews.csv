@@ -1,0 +1,695 @@
+number,rating,confidence,summary,strengths_and_weaknesses,questions,limitations,soundness,presentation,contribution,code_of_conduct
+9378,"6: Weak Accept: Technically solid, moderate-to-high impact paper, with no major concerns with respect to evaluation, resources, reproducibility, ethical considerations.","4: You are confident in your assessment, but not absolutely certain. It is unlikely, but not impossible, that you did not understand some parts of the submission or that you are unfamiliar with some pieces of related work.","This paper proposes an approach to incorporate preference feedback for meta-RL, as opposed to assuming access to dense environment rewards. This takes the form of querying the oracle for ranking two trajectories, and the method leverages ideas from information theory (berlekamp volume) to deal with noise in oracle feedback. The method is evaluated on 6 gym meta-RL benchmark tasks. 
+","Significance - 
+
+-> The paper addresses an important limitation for practical application of meta-RL, i.e the assumption of dense environment rewards. Querying an oracle (eg: human user) is much more feasible. However, in the included experiments, the number of samples required for meta-training is on the order of a million, and the number of preference queries per step is around 10, putting the total number of queries required on the order of 10 million, so training with this scheme would still be impractical for deployment. It is nonetheless a step in the right direction, since dense rewards are very difficult to specify in the real world for arbitrary tasks, while ranking trajectories can still be done. Further since current approaches to meta-RL don’t commonly use preference feedback, this paper will be valuable to the community in helping to start work in this direction. 
+
+Originality - 
+ 
+-> The method proposed involves bringing preference based learning to meta-RL. The authors leverage ideas from information theory (Berlekamp volume) to account for a noisy oracle, and add this to standard context based meta-RL. This formulation seems novel and while the performance benefit over a simpler greedy binary search baseline is marginal, this paper might inspire subsequent work that borrows from similar ideas. 
+
+-> The paper shows advantages of using non-parametric latents (instead of using an inference network like [1]) for the binary feedback problem, as even a random-query strategy can outperform a baseline based on [1]. 
+
+-> The related work adequately discusses context based meta-RL and preference based learning. 
+
+[1] : Efficient Off-Policy Meta-Reinforcement Learning via Probabilistic Context Variables (Rakelly et al.)
+
+
+Clarity - 
+
+-> The paper is clearly written, well motivated and easy to follow, and contains ample details (algorithm boxes, hyperparameter details) to aid in reproducibility. 
+
+Quality - 
+
+-> The preference based meta-RL formulation seems sound. While the experiments only include gym domains these are standard meta-Rl benchmarks. The authors also include ablations where increase in oracle noise leads to worse performance, as expected. 
+
+","-> Can this approach actually be used to train agents with a human oracle (without using the mujoco simulator to rank trajectories?). Experiments using human feedback like in section 5.4 of [2] will help demonstrate the efficacy and practicality of the proposed approach. 
+
+-> Does the approach scale to more complex meta-learning benchmarks, such as meta-world?
+
+
+[2] : Feedback-Efficient Interactive Reinforcement Learning via Relabeling Experience and Unsupervised Pre-training (Lee et al.)
+ 
+",Limitations are adequately discussed,3 good,3 good,3 good,Yes
+9378,"7: Accept: Technically solid paper, with high impact on at least one sub-area, or moderate-to-high impact on more than one areas, with good-to-excellent evaluation, resources, reproducibility, and no unaddressed ethical considerations.","4: You are confident in your assessment, but not absolutely certain. It is unlikely, but not impossible, that you did not understand some parts of the submission or that you are unfamiliar with some pieces of related work.","The paper studies the setting of meta-reinforcement learning, but with the constraint that rewards are not observable at adaptation time. Rather, the algorithm must infer the task by querying a noisy oracle (e.g. a human) which indicates its preferences by ranking given pairs of trajectories. The goal is to adapt to the test task with few queries, to minimize burden on the human.
+
+The authors draw a connection between preference-based adaptation and Rényi-Ulam’s game, an information-theoretic game in which one player tries to guess what the other player is thinking, but they can only communicate via yes/no questions over a noisy channel. Based on this, they propose to use a classical uncertainty quantification tool known as Berlekamp’s volume in order to choose which queries to propose to the oracle. Specifically, they choose the query that maximizes the worst-case uncertainty reduction.
+
+Experimental results indicate that the use of Berlekamp’s volume provides improvement over baselines such as using greedy queries which do not consider the possibility of noise in the oracle’s responses, as well as modifications of PEARL to the preference-based adaptation setting.","Strengths: 
+* The setting of adaptation without dense rewards is useful because it meta-RL more practically applicable.
+* The connection between preference-based adaptation in meta-RL and Rényu-Ulam’s game is novel to my knowledge, and brings information-theoretic tools (specifically, the Berlekamp volume) to bear on the design of the algorithm. This is a useful contribution.
+* The experiments demonstrate improvement due to use of the BVol-based query proposal.
+* The paper is well-written, being organized, clear, and generally well-motivated.
+
+Weaknesses:
+* The paper would benefit from a bit more explanation of the formula for Berlekamp’s volume, since most readers will not be familiar with it.
+* Another useful comparison would be ordinary PEARL using the dense rewards. (I guess you do not even have to re-run it; just use their published results.) This essentially serves as an (unattainable) upper bound on the performance we could expect with a PEARL-like adaptation algorithm, and the gap would show how much is lost by using the preference-based feedback.","The query trajectories in Eq. (6) are selected from “the experience buffer”. Based on the fact that you have to subsample this buffer (presumably for computational purposes), I assume this buffer includes trajectories from meta-training time. Is it reasonable to assume that those trajectories will be available at adaptation time?","The authors have addressed limitations, namely that their method cannot completely eliminate the effect of a noisy oracle (which is to be expected).
+I agree with the authors that the risk of negative societal impacts is negligible. If anything, the impact will be positive because it improves the ability of humans to communicate their preferences to deployed AI agents.",3 good,3 good,3 good,Yes
+9378,"7: Accept: Technically solid paper, with high impact on at least one sub-area, or moderate-to-high impact on more than one areas, with good-to-excellent evaluation, resources, reproducibility, and no unaddressed ethical considerations.","4: You are confident in your assessment, but not absolutely certain. It is unlikely, but not impossible, that you did not understand some parts of the submission or that you are unfamiliar with some pieces of related work.","This work considers a new few-shot meta-RL setting, where the agent does not observe rewards during its few shots on a new task, but instead submits pairs of trajectories to a preference oracle, which returns which of the two trajectories is preferred (i.e., would achieve higher returns). The idea is that querying a preference oracle may require less supervision than obtaining reward labels on these trajectories. Then, to solve this setting, this work proposes a new method for task inference, where a preference predictor is learned to imitate the preference oracle, and then the task is inferred by performing an error-tolerant form of binary search with the preference predictor: the idea is to find a task under which the preference predictor most agrees with the preference oracle. This work evaluates the proposed method on standard MuJoCo meta-RL tasks, where only the reward function changes between tasks, and finds that the proposed method outperforms vanilla PEARL (which is not designed to handle this setting). Furthermore, the experiments show that adding error tolerance to the binary search procedure is important when the oracle includes noise.","# Originality
+This work considers a novel setting, where rewards are not observed in the few shot episodes of meta-RL, and instead, only preferences between pairs of trajectories are given. In addition, and as a result of this novel setting, this work offers a new connection with Renyi-Ulam's games and the notion of Berlekamp's volume, and is overall quite original. However, it is worth noting that the introduction slightly overclaims: Line 48 states that ""reward-free few-shot policy adaptation"" has not been explored in prior work, while [1] does reward-free few-shot policy adaptation, though in quite a different way.
+
+
+# Quality
+- My main concern about the quality is that this work does not obviously validate its claims about feedback efficiency. This work states in several places that it aims to design an algorithm that meets two goals (1) feedback efficiency, and (2) error tolerance. The first goal seems particularly important, since that is a key motivation behind the setting: if it actually requires more supervision than reward labels to provide, then it's unclear why we should consider a preference-based setting. However, the experiments neither test whether the proposed method provides feedback efficiency compared to other methods in this setting, nor whether the preference-based setting requires less supervision than a reward-based setting. I believe that both are critical.
+- Another concern that I have with the experiments is that the experiments consider the case where $K_E$ is correctly specified. However, in practice, it seems unlikely that the noise level of the black-box preference oracle is known a priori. It therefore also seems important to investigate how performance changes if $K_E$ does not match the true noise level.
+- A final concern with the experiments is the set of baselines. Since this work considers a new setting, it is natural that many prior works do not directly apply to the setting, and therefore finding appropriate baselines is tricky. However, while PEARL is an important meta-RL approach, there is a rich set of other meta-RL methods (e.g., RL^2 [2], VariBAD [3]), and it would be helpful to understand whether other existing meta-RL methods also work well in this setting. I note that it's unclear to me how to directly adapt these methods to the new setting in this work, so I do not hold this against this work, but it would also be nice to compare with other meta-RL algorithms beyond PEARL.
+
+# Clarity
+This work is generally understandable, although the presentation is confusing in some places and requires reading ahead and re-reading. I've noted a few areas below:
+- Lines 163-177 discuss how the preference predictor helps transform the setting to Renyi-Ulam's Game by transforming binary preferences into subset inclusion. However, how the preference predictor achieves this is not clear until later in the binary search discussion. In the introduction to the preference predictor, it's only clear that the preference predictor is learned to match the black-box preference oracle.
+- In addition, while the connection to Renyi-Ulam's Game is interesting, introducing it while introducing the main ideas of the algorithm makes it more challenging to understand what's going on. Perhaps first introducing the main ideas of the algorithm, and later showing how they connect to Renyi-Ulam's Game would be easier to understand.
+- The notation can be quite difficult to parse in some places, with many superscripts. It would be nice if this could be simplified in some areas, if possible.
+
+# Significance
+- My main concern with this work's significance is how practically relevant the setting is. As I alluded to in my section on quality, it's unclear to me that the preference-based setting indeed requires less supervision than providing reward labels. In fact, in the domains included in the experiments, it seems like providing reward labels requires the same amount of supervision. Computing the binary preference seems to require the same computations as the reward labels, e.g., computing the distance from the goal, direction, or desired velocity. I would appreciate if the authors could comment on settings where it is clear that preference-based meta-RL is preferably to the standard setting.
+
+[1] Explore then Execute: Adapting without Rewards via Factorized Meta-Reinforcement Learning. Evan Zheran Liu, Aditi Raghunathan, Percy Liang, Chelsea Finn. https://openreview.net/pdf?id=La1QuucFt8-
+
+[2] RL2: Fast Reinforcement Learning via Slow Reinforcement Learning. Yan Duan, John Schulman, Xi Chen, Peter L. Bartlett, Ilya Sutskever, Pieter Abbeel. https://arxiv.org/abs/1611.02779
+
+[3] VariBAD: A Very Good Method for Bayes-Adaptive Deep RL via Meta-Learning. Luisa Zintgraf, Kyriacos Shiarlis, Maximilian Igl, Sebastian Schulze, Yarin Gal, Katja Hofmann, Shimon Whiteson. https://openreview.net/forum?id=Hkl9JlBYvr","I've condensed the main questions in order of most important to least important I have from my review above here:
+- When is preference-based meta-RL practically better than the standard meta-RL setting (and vice versa)? How does the amount of supervision compare between preference-based meta-RL and standard meta-RL?
+- How do the various methods compare in terms of feedback efficiency? How does performance change as a factor of $K$?
+- Are there reasonable ways to compare with other existing meta-RL algorithms?
+- What happens when $K_E$ is mis-specified?","This work could benefit from more discussion about the limitations of the proposed new setting. Additionally, this work restricts itself to the setting where only the rewards change between tasks, while existing meta-RL works often also consider changing dynamics. It would be useful to see some discussion about whether this restriction is fundamental to the proposed method or setting, or if it can be relaxed in some form.",3 good,3 good,2 fair,Yes
+9378,"6: Weak Accept: Technically solid, moderate-to-high impact paper, with no major concerns with respect to evaluation, resources, reproducibility, ethical considerations.","4: You are confident in your assessment, but not absolutely certain. It is unlikely, but not impossible, that you did not understand some parts of the submission or that you are unfamiliar with some pieces of related work.",This work studies meta-RL with preference-based reward learning at meta-test time. The authors interpret this problem as classical problem formulation called Rényi-Ulam’s game and design a query selection method based on the technique of Berlekamp’s volume. The authors verified the effectiveness of proposed methods on standard RL benchmarks.,"# Strength
+
+* Interesting research problem: Meta-RL with preference-based learning is a very interesting research problem, which can be useful for utilizing RL in challenging domains. 
+
+* Clear writing: the paper is well-written and easy to follow. 
+
+* Interesting connection to Rényi-Ulam’s game & technique of Berlekamp’s volume to generate queries.
+
+# Weakness
+
+* Lack of real human experiments
+
+* Lack of comparison with several baselines
+
+# Overall
+
+The paper is well-written and the proposed method sounds reasonable. However, more experiments are required to make this work more interesting. My recommendation is ""boardline accept"".","* There are various uncertainty-based sampling for improving preference-based RL. For example, one can utilize the uncertainty from reward ensembles. It would be nice if the authors could include more baselines in the experiments.
+
+* Even though experiments on locomotion tasks are interesting, it would also be nice to include robotics tasks. I think Meta-world (https://github.com/meta-world/meta-world.github.io) can be a good candidate
+
+* Som quantitative results which visualize the selected queries from the proposed method and baseline can be interesting to understand the effects of ANOLE.
+
+* Other noisy feedback. In addition to iid noise (flipping with the probability of epsilon), experiments on other noisy feedback can be interesting. For example, authors can consider the Boltzman preference model. ","I'd like to recommend including real-human experiments. Because real humans can show various irrationality and have an inductive bias in decision making, the trends on real humans can be different from synthetic preferences. Therefore, it would be nice if the authors could include real human experiments. ",3 good,3 good,3 good,Yes
+7169,"7: Accept: Technically solid paper, with high impact on at least one sub-area, or moderate-to-high impact on more than one areas, with good-to-excellent evaluation, resources, reproducibility, and no unaddressed ethical considerations.","2: You are willing to defend your assessment, but it is quite likely that you did not understand the central parts of the submission or that you are unfamiliar with some pieces of related work. Math/other details were not carefully checked.","The authors propose Globally Gated Deep Linear Networks (GGDLNs), which is a variant of Gated Linear Networks (GLNs) that is more amenable to theoretical analysis. The paper presents a wide breadth of theoretical results, which are additionally supported by simulations.  These include bias & variance analysis for single-layer networks, kernel normalization analysis for multi-layer networks, and multi-task learning.","Backpropagating Kernel Renormalization (BKR) has been applied for analysing multi-layer linear networks. One of the contributions of this work is to extend the BKR analysis to multi-layer non-linear networks.  This non-linearity is achieved via gating as opposed to static non-linearities such as ReLu functions, which makes the analysis tractable. This transition from linear functions to non-linear functions is a significant theoretical progress.
+
+The theoretical analysis is sound and insightful. Most results are intuitive/expected; however, I am confused by some of them, as I explain in Questions 3-6. I will update my evaluation after understanding some of the results better.
+
+The pretrained gating idea is novel and shows promise for GLN-like architectures.
+
+Perhaps the biggest weakness is that the analysis is limited to the GGDLNs, and do not directly apply to popular architectures such as ReLu MLPs. However, analysis of non-linear networks is extreme difficult. So any progress is valuable. As the authors note, the analysis techniques developed in the paper might be applicable to more popular architectures in the future.
+
+The paper is written and presented clearly. However, it can be quite dense in some places, which is expected given the quantity of results.
+
+There are a few minor writing issues:
+- The text could benefit from a spell-check (""processisng"",  ""analayzing"" etc).
+- The x-axis label in Figure 1 must be P instead of M I believe.
+- Panel label d is missing in Figure 7. See caption ""(d) Generalization error increases with...""","1- Is it possible to apply the kernel shape renormalisation theory to GGDLNs with local learning (like in GLNs) instead of backpropagation?
+
+2- Are GGDLNs universal function approximators?
+
+3- Have the authors observed the ""double descent"" with GGDLNs in the simulations?
+
+4- Figure 4 shows that decreasing generalisation error with M. However, as the capacity grows quickly with M, we would expect to see overfitting. Why is this not the case?
+
+5- Can the authors explain what the flattening effect mean in practice? And is it observed in, eg, ReLu networks?
+
+6- Error rate decreases as a function of the threshold in Figure 6.b. For even larger thresholds, eg (5, 10) we would expect to see the error rate to increase again, because the hyperplanes will not be able to separate the data. Is this the case in your simulations? If so, it would be insightful to widen the range of the x-axis.",Limitations are adequately addressed.,4 excellent,3 good,3 good,Yes
+7169,"7: Accept: Technically solid paper, with high impact on at least one sub-area, or moderate-to-high impact on more than one areas, with good-to-excellent evaluation, resources, reproducibility, and no unaddressed ethical considerations.","2: You are willing to defend your assessment, but it is quite likely that you did not understand the central parts of the submission or that you are unfamiliar with some pieces of related work. Math/other details were not carefully checked.","This paper presents theoretical insights that build upon the recently proposed Gated Linear Networks (GLNs). First, a simplified version of (GLNs) called Globally Gated Deep Linear Networks (GGDLNs) are proposed. The motivation for the proposal is to construct a model that can serve as a useful model of learning in general neural networks by being practical enough, yet amenable to theoretical analysis. The proposed model enables the authors to obtain useful theoretical characterizations of the memory capacity and generalization behavior for GGDLNs, which are confirmed via simulations.","I should note that I am not familiar with the prior work in this area, and thus my opinions are only based on a few readings of this paper as a newcomer. I can not ascertain if all relevant prior work has been properly credited, and can not verify that the method of Backpropagating Kernel Renormalization (Li & Sompolinsky, 2021) has been applied correctly to the proposed model.
+Nevertheless, the authors make a good case that GGDLNs are a more interesting model to study compared to deep linear networks studied in recent work, exhibiting generalization behavior that is closer to neural networks used in practice (Sec. 4). It is also shown that there is remarkable qualitative agreement between the paper's theoretical predictions regarding generalization and results obtained using gradient descent, even though technically the theory applies to posterior predictions obtained using Langevin Dynamics. This again indicates that GGDLNs are useful objects to study for predicting the behavior of neural networks in practice.","In Eq. 1, shouldn't there be a summation over $M$ dendrites when computing neuron outputs for the intermediate layers? How are the $M$ dendritic activations used to compute the $N$ neuron outputs otherwise?","Yes, the limitations are discussed in Sec. 6.",4 excellent,2 fair,3 good,Yes
+7169,"7: Accept: Technically solid paper, with high impact on at least one sub-area, or moderate-to-high impact on more than one areas, with good-to-excellent evaluation, resources, reproducibility, and no unaddressed ethical considerations.",3: You are fairly confident in your assessment. It is possible that you did not understand some parts of the submission or that you are unfamiliar with some pieces of related work. Math/other details were not carefully checked.,The authors propose a new architecture based on Gated Linear Networks (GLN) called Globally Gated Deep Linear Network (GGDLN). They derive equation for the generalization properties and describe the architecture theoretically. They present also several experiments comparing GGDLN and the same architecture learned by Gradient Descent.,"The main strength is the attempt to analyze the Gated Deep Linear Networks on the theoretical basis. Moreover the authors have made a considerable effort also to analyse the architecture by different perspectives.
+
+My main concern is that the work is too dense. Nine pages looks too few to contain all the material authors want to present making the reading process difficult (also because the introductory figures are not so good as necessary). For this reason some details are missing, discussion is very short and some clarifications are missing.  ","The formalism in Fig1 is different from the one used in the equations.
+For example $x_i^L$ in Figure and $x_{L, i}$ in the equation
+
+The Fig1(a) should be improved because it is not so clear. Some suggestions:
+- the number of neurons at layer L and L-1 are not explicit (it should be N for all layers right?)
+- it is not clear that $W_{i0}^m$ ...  $W_{iN}^m$ are: the connections between the m-th dendrite of i-th neuron and the neurons 0...N in the previous layer. Maybe the other connections could be depicted with dashed line and focus only on the part important for the computation in Eq.1.
+- it is necessary to define also the layer. In the equation (1), in fact, the authors use $W_{L,ij}^m$. 
+- $x$ is a vector I suggest to use the proper style (e.g. bold, $\mathbf{x}$) in the figure and throughout the paper.
+
+Since, based on my understanding, $a_{i,m}$ is the i-th element of $\mathbf{a_m}$, maybe is more coherent with other approaches in eq.1 to use $a_{m,i}$. However the authors should use a formalism and be coherent throughout the paper
+
+Equation (1) what are the limits of j in the summation?
+
+row 79 --> I didn't understand the formalism. What are $m_1$, $m_2$, etc. What is the meaning of the summation? Maybe I understood the sense but the formalism is not clear neither introduced before.
+
+If I understood well, the parameters are learned maximizing the posterior probability in (3) [as described rows 143-145] but in rows 87-101 is not clearly stated this.
+
+row 118 and Appendix C4 --> Is the network defined in Figure 1 trained using GD as comparison? 
+
+What do you mean as ReLU Teacher task and what do the student network is supposed to do?
+
+The caption of Figure 2 is not clear. I suggest to use bold style for (a), (b), (c), and (d) when the successive text is related to them because, as now, the caption is confusing. I suggest to review all the captions because this problem is common.
+
+row 163-174 : What do you mean with localized receptive fields for the gatings? I didn't understand this part. Could you clarify it?
+
+I didn't understand the rationale behind the comparison of a learning using the proposed approach and the GD learning approach. 
+Why does these modalities should behave the same? Also the authors said that ""While we do not expect our theory to agree with GD dynamics quantitatively, as we will show, our theory makes accurate qualitative predictions for GD dynamics in all examples throughout this paper."". 
+What do author mean with qualitative? The shapes are different and maybe it is not a big deal because the modalities are different. Instead it is important to demonstrate that the proposed approach has a good performance on several tasks (not necessary outperform GD but that accomplish a given task as described in rows 185-201) but the rationale behind the experimental setting is not clear to me.
+
+Section 5 looks like a separated part that could deserve a paper itself. Maybe I remove it and devote more space to clarifications, descriptions, assumption, discussion, etc.
+
+The Discussion section looks like a Conclusion paragraph.",The authors describe more the next perspectives that limitations. ,3 good,3 good,3 good,Yes
+6510,"6: Weak Accept: Technically solid, moderate-to-high impact paper, with no major concerns with respect to evaluation, resources, reproducibility, ethical considerations.",3: You are fairly confident in your assessment. It is possible that you did not understand some parts of the submission or that you are unfamiliar with some pieces of related work. Math/other details were not carefully checked.,"This paper presents a theoretical framework that studies Shapley value in the context of Markov Games as a useful technique for value factorization and credit assignment in agents coalitions. Leveraging this framework, the authors proposed Shapley Q-Learning (SHAQ) derived from a novel definition of a Shapley-Bellman Operator. The proposed algorithm is compared with a suite of existing algorithms (COMA, VDN, QMIX) in predator-prey and the StarCraft MA Challenge, contrasting competitive results while showing interesting properties of interpretability.","**Strengths**
+1. The paper is well-written and properly motivated. The work is well-placed among the existing and vast literature in Multiagent Reinforcement Learning (MARL).
+
+2. The combination of Shapley's theory with Q-Learning seems a novel contribution in the interesting and always challenging setting of MARL.
+
+**Weaknesses**
+1. The experimental section would benefit from a discussion on the interpretability of SHAQ in the predator-prey setting, which seems to be missing in the current manuscript.",1. Would the authors be able to reproduce the interpretability results offer for SMAC on the simple predator-pray setting?,"The authors addressed the limitation of the work, including the assumptions and restrictions imposed in the scenarios considered. ",3 good,3 good,3 good,Yes
+6510,"7: Accept: Technically solid paper, with high impact on at least one sub-area, or moderate-to-high impact on more than one areas, with good-to-excellent evaluation, resources, reproducibility, and no unaddressed ethical considerations.",3: You are fairly confident in your assessment. It is possible that you did not understand some parts of the submission or that you are unfamiliar with some pieces of related work. Math/other details were not carefully checked.,"The paper presents a new framework and corresponding algorithm to solve value factorization in global reward games. Specifically, it derives the Shapley-Bellman optimality equation from evaluating the optimal Markov Shapley value and proposes the Shapley-Bellman operator to solve it, which is also proved in the paper. Furthermore, Shapley Q-learning is presented to implement the theoretical framework for predator-prey and SMAC environments. 
+
+Contributions: The paper proposes a new theoretical cooperative game framework and Shapley Q-learning algorithm for solving global reward games. Moreover, the authors give proof for the theoretical framework and evaluate SHAQ on Predator-Prey and StarCraft tasks, which shows good performance and interpretability. ","Strength: 
+1.	well written, easy to follow
+2.	novel cooperative game framework for global reward game justified both theoretically and empirically
+3.	well literature review on relevant fields
+4.	proof details and codes provided
+
+Weakness:
+1.	Figures 1,2,3 are too small to read easily
+2.	Improvements seem not significant compared to SOTAs
+","Authors assume games (Predator-Prey and StarCraft) are satisfied those conditions of MCG in Eq. 1 (line 78), does it always satisfy?","The assumption in line 78 for Markov convex games looks too strong, is it possible to extend the same results to general cooperative games?",3 good,3 good,3 good,Yes
+6510,"6: Weak Accept: Technically solid, moderate-to-high impact paper, with no major concerns with respect to evaluation, resources, reproducibility, ethical considerations.","4: You are confident in your assessment, but not absolutely certain. It is unlikely, but not impossible, that you did not understand some parts of the submission or that you are unfamiliar with some pieces of related work.","The paper considers multiagent reinforcement learning in a global (cooeprative) reward game. It contrasts the results value factorization frameworks, and proposes an alternative via the Shapley value from cooperative game theory. Basically, the authors consider a form of game with coalition structures, and apply the Shapley value to decompose the reward, and derive and Shapley-Bellman optimiality equation (SBOE) corresponding to the optimal joint determinisitic policy. They propose a Shapley-Bellman opeator (SBO) that solves for the SBOE. These finally give rise to a new multiagent reinforcement learning algorithm, called Shapley Q learning, SHAQ for short,  somewhat akin to existing value factorization methods. 
+
+Empirically, on a few settings (predator-prey and starcraft)  SHAQ exhibits better performance than existing approaches, and also provides some interpertability foundation. ","The key strength of the paper is in applying cooperative game theory tools to multiagent Q learning. Recently the Shapley value has become a very popular tool in machine learning due to its ability to decompose the performance of a model to the relative influence of specific features. This has proven a very strong tool for analyzing supervised learning models. The authors propose now propose to use this theoretic foundation to multiagent reinforcement learning. 
+
+The key weakness in my opion is not having a clear, crisp takeaway from this work. If the main claim is the superior performanc on multiagent reinforcement learning, then the empirical analysis seems to be somewhat lacking, as it covers relatively few domains (there are now enough multiagent gyms that allow a wider variability of tasks). If the main claim is a theoretical foundation, then one might expect a tighter analysis and bounds as compared to existing approaches. 
+
+Either way, I think the writing is very formal, and could be imporved. What is the main driving intuition here? MARL is typically considered through a non-cooperative game theory prism (Markov Game). Here you are trying to use cooperative game theory, which means you consider subsets of agents, and have some function mapping each such subteam to its success in the task. Then, one might view the Shapley value as a decomposition allocating each single agent its individual reward / impact in the team's success. But why use the Shapley value rather than other solution concepts (such as the Core, which you mention, or the least-core), or the Nucleolous, or the Kernel, or other similar power indices such as the Banzhaf index? Are you using some of the axiomatic foundations to the Shapley value? If so, then where? 
+
+All in all, I really love the topic of the paper, but the execution could be improved (more domains for empirical evaluation, tighter theoretic bounds versus baselines). And the writing should focus on the intuitions before jumping to the technical definitions ","What happens in domains which are not completely cooperative (team reward), such as social dillemas or mixed motive games. Does the algorithm still runs? Does it fail? What happens when agents are trained using a mixture of algorithms (SHAQ agent with other approaches - are they compatible). Can you replace the Shapley value with other cooperative solution concepts (the Banzhaf index seems to be the closest, basically your equation just with different weights for the subteams) - does the whole method fail? ","As I wrote, the empirical analysis is somewhat limited (but certainly a decent foundation). Also the writing could be improved - at the very least I'd give the formal definitions of a transferable utility cooperative game, coalition structures, the core (as applied to a general CS or characteristic function game). The paper does a better job on the RL side (where things are fully defined). Also, you should have the discussion on what happens in non team reward (non fully cooperative) settings. 
+
+All in all, a very interesting paper, if only for the nice connection between RL and cooperative game theory. ",3 good,2 fair,3 good,Yes
+5769,"5: Borderline accept: Technically solid paper where reasons to accept outweigh reasons to reject, e.g., limited evaluation. Please use sparingly.",3: You are fairly confident in your assessment. It is possible that you did not understand some parts of the submission or that you are unfamiliar with some pieces of related work. Math/other details were not carefully checked.,"This paper studies the proportionally fair optimization problem (i.e., $\max f(x) = \sum_i \log x_i$) under packing constraints ($A x \leq 1$ for a matrix A of nonnegative entries). The main contribution is a distributed accelerated algorithm for fair packing. The algorithm is width independent and produces (additively) approximate solutions for both primal and dual.
+
+Width is defined as max ratio of positive entries in the matrix A. First order width-dependent methods don't readily lead to polynomial-time algorithms because smoothness constants do not scale logarithmically with width. In addition, approximate solutions of primal and dual are not easily translatable. In light of this, designing width-independent approximation algorithms for both primal and dual sounds challenging.
+
+This is done by extending a general technique for packing LPs and exploiting problem structure to design a distributed algorithm. Distributed width-independent algorithms for general packing LPs are not yet known. Unlike prior work, the new algorithm is determinstic, has additive (not multiplicative) error, and uses a different regularization. The new algorithm uses $O(n/\epsilon)$ iterations, a factor n smaller than the best prior method.","Strengths:
+- Primal and dual algorithms are both width independent. (Translating approximate solutions between primal & dual is not easy.)
+
+Weaknesses:
+- No discussion of concrete applications, hence no experimental study to show practical benefits, runtime and error bounds.",none,n/a,3 good,3 good,3 good,Yes
+5769,"7: Accept: Technically solid paper, with high impact on at least one sub-area, or moderate-to-high impact on more than one areas, with good-to-excellent evaluation, resources, reproducibility, and no unaddressed ethical considerations.","4: You are confident in your assessment, but not absolutely certain. It is unlikely, but not impossible, that you did not understand some parts of the submission or that you are unfamiliar with some pieces of related work.","**The problem and its importance** 
+
+The paper presents an *accelerated, width-independent algorithm* for the $\alpha$-fair-packing problem with $\alpha = 1$, in the distributed model of computation. The problem is motivated by that of fair allocation of (non-negative) resources and falls under the broad umbrella of $\alpha$-fair-packing problems, which are an important problem class encompassing, for example, the standard packing LP, which has seen a long line of work (for example, by Luby-Nisan, Fleischer, Plotkin-Shmoys-Tardos, Awerbuch-Khandekar, Young, Koufogiannakis-Young, Allen-Zhu-Orecchia, Wang, Mahoney-Rao-Wang-Zhang, etc.) in both theoretical computer science (most significantly in the context of multicommodity flow problems) and machine learning that have led to developments of techniques that are now widely used in optimization in general. Therefore, this paper definitely studies a very important problem. 
+
+The paper further studies the dual of this algorithm and applies it to obtain an improved analysis of the classical Yamnitsky-Levin algorithm. 
+
+**The technical outline** 
+
+The paper solves the primal problem by building upon the work of Diakonikolas-Fazel-Orecchia and AllenZhu-Orecchia. Specifically, the problem reformulation and parts of analysis (the gradient descent progress) is drawn from DFO, whereas the framework of ``truncated gradients in mirror descent coupled with gradient descent'' comes from AZO. We explain these a bit more next. 
+
+The notion of ``fairness'' is captured in the objective via maximizing the *product* of allocated resources (and taking the log to formulate it as a convex minimization problem), which results in the problem $\max_{x\geq 0, Ax \leq 1} \, \sum_{i = 1}^n \log x_i$. The final reformulated problem involves the following modifications to this problem: (1) reparametrizing the problem variable to make the (initial) objective linear; (2) moving the packing constraints into the objective via an exponential penalty; (3) adding a box constraint based on properties of the optimal point. We note that these modifications were first done in DFO. 
+
+For this reformulated problem, the gradients lie (coordinatewise) in $[-1, \infty)$. The algorithm proceeds as follows. It takes a mirror descent step using the squared-loss mirror map and on the linear term defined by the *truncated* gradient. The truncation is essential for obtaining a regret that is independent of the width of the problem, and this idea stems from AZO. Next, the algorithm takes a ``gradient descent step'' with the amount of update scaled proportional to the amount of movement via the mirror descent step. Following the gradient descent analysis of DFO, the paper shows a minimum bound on the progress via this step. Finally, the iterates obtained via the mirror descent and gradient descent steps are coupled in a convex combination (and their analysis performed analogous to that in AZO). This gives a primal algorithm with $\epsilon$-additive optimal point in $O(n/\epsilon)$ iterations. 
+
+**Contributions** 
+
+1. The paper's main result is an $O(n/\epsilon)$ iteration algorithm for the stated primal problem. The previous best result by DFO was $O(n^2/\epsilon^2)$, making this paper's contribution in terms of results very clearcut. Further, in achieving this iteration count, the paper becomes the first to achieve both width-independence and acceleration for the $1$-fair-packing problem, which is quite a significant and a highly non-trivial contribution in this line of work. 
+
+2. While the paper definitely builds upon the work of DFO and AZO (as described above), the way it combines them is novel (which is what gives it its new, improved result). 
+
+
+
+
+","**Strengths** 
+
+1. Achieving both width-independence and acceleration for $1$-fair-packing is quite a significant result. In my opinion, just the first component of the paper (the primal result) is a strong result in itself. 
+
+2. The paper's primal algorithm is very clean, with very clearcut operations (mirror descent, gradient descent, and coupling) along with their corresponding analyses. The *reasons* for various steps in the algorithm (example, gradient truncation) and why the analysis works (example, the progress by gradient descent compensating the regret bound via the truncated gradient) is also all explained very transparently. 
+
+3. The previous best result on this problem (DFO) achieves their result by a different technique (approximate dual gap technique), so it is quite nice that this follow-up work follows a different technique.  
+
+**Weaknesses** 
+
+1. Given that the paper greatly builds upon the work of DFO (for the primal algorithm), I think one way to make this paper even more transparent would be to (if possible) try and frame DFO's algorithm in this paper's language. More concretely, can you write DFO's algorithm in the ``coupling'' framework of this paper (which in turn draws this from AZO) and show exactly what steps of DFO (in this framework) were changed to achieve this paper's result? 
+
+2. I think the main body (the primal section) could do a slightly better job of giving more complete justifications/attributions. As examples, 
+
+    * it's not immediate from the algorithm in the main body that the iterates all lie in the box (though this is justified in the appendix); perhaps a pointer to this lemma would be good. 
+
+    * Further, I think it's important to clearly state in the main body what parts of the problem formulation and analysis are derived from DFO and AZO (for example, Lemma 2.3 is basically that of DFO). Having these attributions clearly stated will more clearly shine a light on the paper's novelty, without taking away the contributions of DFO and AZO. 
+
+3. I found the dual algorithm/analysis way more dense than the primal part. Is it possible to simplify this section's exposition? 
+
+**My overall verdict** 
+
+I think this is a worthy problem, with a simple, clean algorithm for the primal case, a creative one for the dual case, and an interesting application to a classical algorithm (Yamnitsky-Levin) that I had been unaware of. 
+
+In addition to its primary contributions (the primal and dual algorithms and analysis), the final contribution adds value to the optimization/ML literature by bringing to fore a (possibly) less-known classical algorithm. This would therefore be a nice contribution to NeurIPS '22. ","0. Please see the **Weaknesses** section above for other questions. 
+
+1. My first obvious question is, why doesn't this algorithm extend to the case $\alpha \neq 1$? Or, if it does, then what is the iteration complexity? It would make the paper more complete to explain this as well. ","I very much appreciate the authors being upfront about the paper not generalizing to the $\alpha \neq 1$ case. Given that this is a theoretical paper, I do not foresee any negative societal impact of the paper and have no suggestions to this end. ",3 good,3 good,4 excellent,Yes
+5769,"5: Borderline accept: Technically solid paper where reasons to accept outweigh reasons to reject, e.g., limited evaluation. Please use sparingly.","2: You are willing to defend your assessment, but it is quite likely that you did not understand the central parts of the submission or that you are unfamiliar with some pieces of related work. Math/other details were not carefully checked.","The paper solves the so-called 1-fair packing problem via first-order methods. The main results are computational complexity of O(n/epsilon) for the primal problem and O(n^2/epsilon) for the dual problem. These results are not width dependent (where the width is the ratio of largest to smallest elements in matrix A), which is a plus.",The strength is that the paper studies a fairly important problem in resource allocation. I like the results overall. The weakness is that the method developed follows closely to Allen-Zhu and Orecchia (Math. Prog. 2019). It seems that it simply customized their approach to this specific setting. The computational complexity results are good but at the expense of solving more difficult oracles.,I am not too familar with the literature on this problem; perhaps a in-depth discussion about pros and cons of the developed algorithms compared to the state-of-the-art would be helpful to readers.,The authors did not address the limitations and potential negative societal impact of their work but it is okay given the nature of this work.,3 good,3 good,2 fair,Yes
+5769,"5: Borderline accept: Technically solid paper where reasons to accept outweigh reasons to reject, e.g., limited evaluation. Please use sparingly.","4: You are confident in your assessment, but not absolutely certain. It is unlikely, but not impossible, that you did not understand some parts of the submission or that you are unfamiliar with some pieces of related work.",This paper studies proportional fair resource allocation problem and develops first-order methods,"Strengths: The analysis is solid and the problem is interesting.
+
+Weakness: The developed first-order method is limited to the problem itself.","Can the algorithms be generalized to other optimization/learning problems?
+
+Theorem 2.5 depends on big constants, which can be exponential in n?",The developed first-order method is limited to the problem itself.,3 good,3 good,2 fair,Yes
+10162,"7: Accept: Technically solid paper, with high impact on at least one sub-area, or moderate-to-high impact on more than one areas, with good-to-excellent evaluation, resources, reproducibility, and no unaddressed ethical considerations.","4: You are confident in your assessment, but not absolutely certain. It is unlikely, but not impossible, that you did not understand some parts of the submission or that you are unfamiliar with some pieces of related work.","This work theoretically studies the heterogeneous cross-silo federated optimization problem. Previously,  Mishchenko et al. [2022] had shown that SCAFFOLD with randomized number of local steps (which they call Prox-Skip / ScaffNew) enjoyed an accelerated communication complexity, proving improvement due to local steps. 
+
+This paper extends their framework to employ variance reduction and compressed communication at the client level, while maintaining the accelerated communication complexity. They also propose an hierarchical federated model where clients are attached to always-available hubs for which their algorithms are particularly well suited.","# Strengths
+
+1. The approach is well motivated and forms a natural line of inquiry - combining communication compression + variance reduction with ProxSkip. 
+2. The results obtained by the authors, though not surprising in the light of ProxSkip, are significant and technically involved. It is a result of synthesizing several state of the art analysis techniques, and recover most of them as state of the art.
+3. I also enjoyed the motivation of the local variance reduction via the hub model and can see it being useful.
+
+# Weaknesses
+
+Most of the weaknesses stem from poor writing (see questions section for detailed feedback) - i) section 4 is very terse and not elaborated well , and ii) the limitations of the method and comparison with prior work is not well carried out.
+The most impactful aspect of this paper might be the new hierarchical FL model proposed. But unfortunately, there is almost no discussion on its unique aspects, optimality etc.","# Suggestions for improvement
+
+1. Section 4 is way too terse and hard to comprehend. The setting of the hub model and the algorithm description should be separated (perhaps with pseudo-code). I had to work hard to reconstruct what was being conveyed. E.g. of confusions: why is the global gradient a concatenation of estimators in eq (12)? control vector y_t is used before it is defined (in fact it is never properly defined or initialized) etc.
+2. It is also unclear how Theorem 9 relates to Theorem 5?  Why can we not use VR and CC directly in Section 3 with Thm. 5? Thms 6 and 8 are definitely direct corollaries of Thm 5 and it would be clearer if stated as such.
+3. More time should be spent explaining the results in Corollaries 1 and 2 - what is $\omega$ and how should we think about it? why does it scale as $\omega / M$ and is the optimal scaling? The latter relies on the independence of the compression randomness, which is not stated. Overall, I think the paper would greatly benefit from moving some of the exposition in Section 2 to the Appendix and instead expanding on the results in Sections 3 and 4, with greater discussion about the implications of the theoretical rates.
+3. The result for the setting with C > 0 is not optimal since there is no speed-up wrt to number of clients. The optimal rate likely scales as C/M (as SCAFFOLD obtains).
+4. Also, while client and data sampling are discussed in detail in Sec 1.2, their effect on ProxSkip-VR is never discussed.
+5. It should be made clear that all the discussion in the paper is for cross-silo FL and does not apply to cross-device FL.
+6. Nitpick (feel free to ignore): the colors used in the text (e.g. in math symbols like W and E in Thm 5, and algorithm names) made it visually busy, confusing and harder to read for me. I would suggest using such colors sparsely in text - more as a shorthand (e.g. red is always error terms) rather than for emphasis or drawing attention. ","The limitations of the method are not adequately discussed. The questions section above goes into detail.
+
+Note: I am willing to raise my score on an assurance from the authors that the writing and presentation will be improved. The results are otherwise technically sound and interesting.",4 excellent,2 fair,3 good,Yes
+10162,"7: Accept: Technically solid paper, with high impact on at least one sub-area, or moderate-to-high impact on more than one areas, with good-to-excellent evaluation, resources, reproducibility, and no unaddressed ethical considerations.","4: You are confident in your assessment, but not absolutely certain. It is unlikely, but not impossible, that you did not understand some parts of the submission or that you are unfamiliar with some pieces of related work.","The paper proposes a new variance reduced variant to ProxSkip, called ProxSkip-VR, for federated learning. It possesses a combination of preferable techniques in federated learning including data sampling, client sampling and local training. The variance reduced estimator is general and covers numerous existing estimators. Linear convergence is proved for the strongly convex objective. More importantly, the paper take a closer look on the cost of training FL methods by incorporating local training cost and communication cost whereas most existing FL methods only consider communication cost in convergence results. Numerical experiments on regularized logistic regression is presented to illustrate the performance of ProxSkip-VR compared to existing methods.","Strengths:
+- The paper is well-written. I can see the history of FL methods evolving over different generations.
+- ProxSkip-VR possesses several important properties for an FL method: client sampling, data sampling, and variance reduced local update step.
+- The paper proposes a new architecture for FL which contains hubs between server and workers. This architecture is reasonable and it represents many real-world applications.
+- Convergence results are provided which cover different type of gradient estimators.
+- The evaluation considers the total cost which consists of communication cost and local training cost which has not been considered in existing works. This also help show the advantage of using variance reduced estimator in local training.
+
+Cocerns:
+- Table 1 summarizes results of ProxSkip-VR w.r.t. existing works. It shows that communication complexity of ProxSkip-VR is better than GD but it does not explicitly discuss how it is better and the reader needs to go back and check the other paper to learn about this comparison.
+- I do not see how the control vector $y_t$ is chosen in the proof of ProxSkip-VR (Theorem 5). I wonder if $y_t$ is chosen the same as in (11).
+
+Minor comments:
+- The experiments has a non-zero value for the penalty parameter $\lambda$ for $\{x\}^2$ regularizer but the code appears to set it to 0. I am not sure if the code precisely reflect the setting of the experiments described in the paper.","- ProxSkip-VR assumes that the stochastic gradient $g_t$ is unbiased. Can the theory be generalized to biased estimators to cover this type of gradient estimators?
+- Does the proof of ProxSkip-VR in Appendix C hold for any choice of $y_t$ or it has to be a certain choice so that $g_t$ satisfies Assumption  4?","With the definition of $r$ in (4), I think assumption 3 is not needed.
+I hope to see more discussion on how to select $y_t$ in the main text.",3 good,3 good,3 good,Yes
+10162,"6: Weak Accept: Technically solid, moderate-to-high impact paper, with no major concerns with respect to evaluation, resources, reproducibility, ethical considerations.",5: You are absolutely certain about your assessment. You are very familiar with the related work and checked the math/other details carefully.,This paper investigates applications of the variance-reduced technique in Federated Learning and proposed a new algorithm based on **ProxSkip** in [Mishchenko et al. 2022]. The method constructed by the authors can be substantially faster in terms of the *total training time* than ProxSkip in theory and practice in the regime when local computation is sufficiently expensive. The authors also corroborate their theoretical results through experiments.,"**Strengths**
+1. The proposed method **ProxSkip-VR** enjoys a lower communication complexity than gradient descent.
+
+2. This paper proposed a new FL architecture, where ProxSkip-VR can be substantially faster in terms of the *total training time* than ProxSkip.
+
+3. The authors corroborate their theoretical results with carefully engineered proof-of-concept experiments.
+
+**Weaknesses**
+
+1. The algorithm can be impractical since we can not control the communication timestamp.
+
+2.  Attributing to combine L-SVRG [Hofmann et al., 2015, Kovalev et al., 2020a] and DIANA [Mishchenko et al., 2019] techniques, the improvement over ProxSkip is natural. Hence the novelty is limitted.","1. Table 1 says the communication complexity of **FedLin** is worse than GD. But the communication complexity of FedLin is also reduced by a factor of $H$ compared with GD, where $H$ is the number of local updates (see the discussion below Eq. (9) of [Mitra et al., 2021]). Therefore, the communication complexity of FedLin can also attain $O(\sqrt{L/\mu}\log(1/\epsilon))$ by setting $H = \sqrt{L/\mu}$.
+
+2. In [Mitra et al., 2021], the authors show that FedLin converges much faster than SCAFFOLD in experiments of the linear model. However, the performance of FedLin in Section 5 is worse than SCAFFOLD and Local SGD, which is unreasonable since FedLin has a *linear convergence rate*. And I don't think the difference between logistic regression and linear regression is the reason. So I doubt the results in Section 5, could you explain the reason?","This paper identifies 5 distinct generations of LT methods and classifies ProxSkip and ProxSkip-VR in Generation 5: Accelerated Age, but I don't think the full-gradient and variance-reduced methods are practical and popular in FL. Considering large-scale machine learning models, stochastic gradient descent (and its variants) with the *constant batch size* is a prevalent training scheme. So the summarization in this paper may be less appropriate.
+
+Considering existing works [Mitra et al., 2021] and [Mishchenko et al. 2022], the contribution and novelty are limited. More importantly, the experiment results are not convincing.",3 good,3 good,2 fair,Yes
+10438,"5: Borderline accept: Technically solid paper where reasons to accept outweigh reasons to reject, e.g., limited evaluation. Please use sparingly.","4: You are confident in your assessment, but not absolutely certain. It is unlikely, but not impossible, that you did not understand some parts of the submission or that you are unfamiliar with some pieces of related work.","This paper sets out to extend the PAC-Bayes framework to establish new generalization bounds for multi-class classification with M classes of errors extending the 0-1 risk. The main results appear to be Theorem 3 and Corollary 7, which generalize previously known results in this space, and can recover those existing results. My biggest concern about this paper is that I don't find the problem setup inspiring. In particular, the only worked out examples are in Section 4. The novel and interesting piece seems to be the definition of kl^-1, but I find the study to be thin. To sum everything up, I think the derived results appear to be correct; there is some novelty in proofs; but the setup of the problem is not well motivated and it is not clear how these results may be used to derive intuition or practical algorithms. ","Strengths 
+* The paper is clearly written and the theoretical derivations are clearly discussed
+
+* Theorem 3 extends the existing results in the literature, and the proof requires some nice extension of existing results including Lemma 5.
+
+* Corollary 7 is also a nice extension of the existing results. While I did not follow its proof closely, the form of the result appears to be meaningful.
+
+* The new results motivate some new study, including a new definition of kl^-1 that seems to be interesting.
+
+Weaknesses:
+
+* The setup of the problem is not well motivated, and the study has not resulted in deriving new intuitions.
+
+* The new definition of kl^-1 is not well motivated and the details around it are thin.
+
+","* As one example I can think of: can you say anything about balancing false positive rate and false negative rate in a binary classification? 
+
+* In particular, can you probably make any connections with the fairness literature where the goal might be to equalize false positive rate and false negative rate?","As it currently stands, the impact of the paper is not well quantifiable.",3 good,3 good,3 good,Yes
+10438,"5: Borderline accept: Technically solid paper where reasons to accept outweigh reasons to reject, e.g., limited evaluation. Please use sparingly.",3: You are fairly confident in your assessment. It is possible that you did not understand some parts of the submission or that you are unfamiliar with some pieces of related work. Math/other details were not carefully checked.,"The paper studies the PAC-Bayes generalization bound, which is an important topic and has been successfully applied to produce non-vacuous generalization bounds for neural network. The authors extend the existing results to the multiclass setting by introducing the discretized error types, which is a disjoint partition of the assembly of model prediction and ground truth labels. Based on the results, the authors further provide an abstract implementation of the method which can be applied to the real tasks.","Strength:
+
+1.The derived theorems hold for multiclass problem and soft labels, which has a wide range of applications to the real learning tasks. Such results in the PAC-Bayes literature have not been well-studied yet.
+
+2.Although there are no empirical studies to validate the results, the authors provide abstract implementation of the algorithm for better understanding the applications of the theorems.
+
+3.The paper is well presented and easy to understand. Detailed proofs are provided in the paper and supplementary material. 
+
+Weakness:
+
+1.The technical contribution is somewhat weak in my view. The authors leverage the discretized error types to incorporate the entire confusion matrix, but many steps of the proofs mainly follow existing results.
+
+2.For the minor problems, there are some flaws in the paper, e.g., incorrect citations in L13 in the paper.
+","Although the discretized error types can be arbitrary in the theorem, are there any suggestions to set this parameter in the real tasks?
+
+Can you make more detailed discussion about your results that whether they are vacuous or not?
+",N/A,3 good,3 good,2 fair,Yes
+10438,"7: Accept: Technically solid paper, with high impact on at least one sub-area, or moderate-to-high impact on more than one areas, with good-to-excellent evaluation, resources, reproducibility, and no unaddressed ethical considerations.","2: You are willing to defend your assessment, but it is quite likely that you did not understand the central parts of the submission or that you are unfamiliar with some pieces of related work. Math/other details were not carefully checked.","The paper deals with multi-class classification with a vector of $M$ possible error types. The paper establishes a PAC-Bayes bound for the convergence of the empirical error vector to the expected one,  under some convex distance measure (Thm. 3), and gives a more explicit bound for the kl-measure between the Multininomial distributions parametrized by those two corresponding vectors (Cor. 7). Finally, the paper discusses how the result of Cor.7 can yield a bound for the individual error types, and how to derive a gradient-based algorithm that minimizes the bound.
+","### Strengths
+
+1. The problem of multi-class generalization bounds for the confusion matrix is interesting.
+2. The main results (Thm. 3, Cor. 7) seem elegant and non-trivial to derive. 
+
+### Weaknesses
+
+1. The writing can be improved - for example - paragraph 38-48 is hard to follow, The structure of the paper can be improved, currently, the main contributions are hard to discern from smaller details.
+
+2. Classical PAC-Bayes bounds (e.g. Maurer ‘04) can account for non-zero-one losses.  An alternative route to deriving bounds on the divergence of the empirical confusion matrix from the expected one, under some matrix norm, can be using those classical bounds for each error type and then using the union bound. How does this simple approach compares to the results in the paper?  I think the paper lacks comparisons to possible simpler approaches.
+
+3. In the introduction, the authors describe a problem where each error type is associated with a different loss value $\ell_j \in [0, \infty)$. However, if am not mistaken, the bound presented in Thm 3. and Cor. 7 seem to only deal with $\ell_j \in {0,1}$.
+
+4. There are also no explicit results for the convergence of the confusion matrix under some matrix norms.
+I may have not understood correctly the results, in that case, I suggest the authors improve the clarity of these issues, by emphasizing the corresponding formulations and results. 
+
+5. There is no experimental validation for the suggested algorithm and for the bounds.
+
+
+","1. 
+Line 170 -  I didn’t understand the comment about $m’$. How is the formulation with $\beta$ more general?
+",No further limitations ,4 excellent,2 fair,3 good,Yes
+3025,"6: Weak Accept: Technically solid, moderate-to-high impact paper, with no major concerns with respect to evaluation, resources, reproducibility, ethical considerations.","4: You are confident in your assessment, but not absolutely certain. It is unlikely, but not impossible, that you did not understand some parts of the submission or that you are unfamiliar with some pieces of related work.","The authors present Direct ONE-shot learning with Hebbian imprinting (DONE) a method for one-shot learning inspired by Hebbian learning in the brain. The method uses neural activations from the final layer of an “encoder” network (such as a vision transformer or EfficientNet) on a single example from an unseen class to create a weight vector for the class of the new class. The presented method is closely related to and improves upon a that of a 2018 paper by Qi et al, which the authors cite. 
+
+The authors present experiments in which DONE is compared to Qi’s method. Specifically, the authors one-shot-learn 1 or 8 classes, evaluate the performance on those classes, and measure the degree to which the new classes interfere with initially trained classes. The authors also present results on k-shot learning. 
+","Strengths:
+1. The paper presents a novel and simple method for few-shot learning. 
+2. While the paper does not claim to model the brain, it is exciting to see that one-shot learning with brain-line Hebbian imprinting can work so well. 
+3. This paper is a pleasure to read. It is well-structured, and the writing is mostly clear. 
+
+Weaknesses
+1. The authors compare their method with only one method, when it would have been helpful for readers to compare to a broader range of existing one-shot learning approaches for image classification. The authors state “It is meaningless to compare the above three approaches with weight imprinting, because weight imprinting does not contain any optimization algorithm. “ . I disagree with this, for two reasons. First, papers such as the one about one-shot learning with siamese networks (https://www.cs.cmu.edu/~rsalakhu/papers/oneshot1.pdf), which the authors cited) are quite similar to DONE in that a big model gets trained on large amounts of data in a time-consuming process, and later one-shot classification becomes cheap. In other words, both were optimized at some point. Second, even if two models fall into different categories (e.g. because one is much more computationally expensive than the other), it’s useful for readers to know how much accuracy they lose (if any) by using a more flexible methodology. 
+2. While the algorithm from the paper is novel and undoubtedly very elegant, it is very similar to Qi’s method and other papers that the authors cite. In this sense, the paper is not a must-read for most researchers in the community. 
+","1. The authors write on line 31 that “The human brain does not necessarily have more complex processes than DNNs…”. I recommend to remove this statement. Many researchers would disagree with the statement, and the statement is not essential to the paper. 
+
+2. The authors write on line 33 that “a series of simple processes such as linear filtering followed by a nonlinearity can describe the function of lower visual cortex”. I recommend to rephrase this slightly, as learning in the lower visual cortex is part of the lower visual cortex’s function, but that aspect is not described by a series of simple processes such as linear filtering followed by a nonlinearity. 
+
+3. “modify” on line 48 should be “modifies”
+
+4. On line 61, the authors write “neural activity and synaptic strength are different in dimension.” Do the authors mean  “neural activity and synaptic strength are different in scale.”? Line 157 also mentions “different dimension” when the authors may have meant “different scale”. 
+
+5. On line 135, the authors write “the backbone DNN model is a very good model as a heritage of mankind”. I did not understand this sentence. Could the authors rephrase it?
+
+6. Figure 2 is impossible to understand without referring to explanations of data point markers in section 4.1, which means that a reader needs to jump back and forth between the Figure 2 and the text on the page after. I recommend explaining the figure markers in Figure 2’s caption instead of in section 4.1. 
+
+7. On line 185, the authors write “(not 1008 classes here)”. At this point, the reader has not yet read about the 1008-class experiments. How about removing the comment in parentheses?
+
+8. The EfficientNet architecture is misspelled in a number of places in the paper, e.g. as “EfficinetNet” and “EfficientNnet”
+
+9. Koray Kavukcuoglu’s name should be upper-cased on line 377. ",The authors have adequately addressed the limitations and potential negative societal impact of their work.,3 good,3 good,3 good,Yes
+3025,"5: Borderline accept: Technically solid paper where reasons to accept outweigh reasons to reject, e.g., limited evaluation. Please use sparingly.","4: You are confident in your assessment, but not absolutely certain. It is unlikely, but not impossible, that you did not understand some parts of the submission or that you are unfamiliar with some pieces of related work.",The paper proposes a one-shot learning mechanism that adds a new class to the network's output using quantile normalization of the new input (to the last layer) w.r.t. weights in the last layer that correspond to the old classes.,"## Strengths:
+1. The proposed one-shot classification method is simple and, unlike previous work, doesn't require layer normalization in the second last layer.
+2. The method works reasonably well.
+3. The method is novel, as far as I know.
+
+## Weaknesses:
+1. This work has ""Hebbian"" in the title and some part of the text, but as far as I can tell has nothing to do with Hebbian learning. (Elaborated in the Questions section)
+2. Performance of the method is not adequately compared to previous work. (Again, elaborated below) 
+
+## Summary
+
+My current score is 4 (borderline reject). The paper proposed an interesting method, but it doesn't properly explain why it works, and it doesn't justify the lack of comparison (in terms of performance and computational complexity) with previous methods. I'm willing to increase the rating if my points are addressed, however.","## Large concerns
+### Hebbian learning
+This work does not describe a Hebbian mechanism of learning. Hebbian means $\Delta W_{ij} = f(x_i, y_j)$ for input neuron $x_i$ and output neuron $y_j$ (in the classical Hebbian sense, $f(x, y)=xy$). Eq. 3 is fundamentally not Hebbian because it uses information about other weights. Lines 154-155 say quantile normalization ""is suitable for implementing Hebbian theory"", but this claim is not backed up. The authors should either thoroughly explain what makes their method Hebbian, or remove mentions of Hebbian learning.
+
+### Comparison with previous methods
+In lines 104-109 the authors try to explain why they’re not comparing their method to previous work directly:
+> It is meaningless to compare the above three approaches with weight imprinting, because weight imprinting does not contain any optimization algorithm. Therefore, in principle, there is no reason for weight imprinting methods to outperform other methods by themselves in accuracy. The performance of weight imprinting methods is uniquely determined by the backbone DNN without any randomness, hence its performance is suitable as a reference baseline for other methods. Thus, weight imprinting does not aim for the highest accuracy but for practical convenience and reference role as a baseline method.
+
+– I can agree with not chasing the best accuracy, but then there must be a discussion of concrete practical benefits of the method. (No optimization != faster, as quantization takes some time too.)
+
+### Overall reason behind the method
+Section 3.1: I did not understand why quantile normalization helps. Shouldn’t it make the response in each neuron $y$ similar to that of the new class? Either way, the authors should spend more time explaining their method and why it works, as it is the core contribution.
+
+## Unclear parts in the text
+
+Lines 135-136: ""the backbone DNN model is a very good model as a heritage of mankind and should not be changed as much as possible (especially for many non-expert users)""
+– this is not an explanation.
+
+153: what probability distributions? Everything has been deterministic so far, so it's worth explaining what distributions are discussed here. Is it over individual weights? Individual neurons?
+
+166: ""The range of applicable models is yet unclear, but in principle it is wider than Qi’s method.""
+– what does it mean? The line before said that you need a network with a dense final layer, which clearly defines the range of models.
+
+223-224: what’s good accuracy for practical uses? It’s never explained how the authors came up with that value
+
+## Small corrections
+**Note**: the paper contains a lot of grammatical errors. One simple way to fix it is to copy-paste the source code into a google doc and go through all suggested corrections.
+
+Line 15 (abstract): performs ""at a"", not ""a"", practical-level accuracy?
+
+Also next sentence: Can write as ""DONE overcomes ...mentioned issues of DNNs...""; Currently the sentence doesn’t read well.
+
+92: uses ""a"" classification
+
+93: aim""s""
+
+145: applies to, not apply into
+
+212-214: black and orange said twice
+
+Why is the supplementary material just a corrected version of the main paper?
+","The authors can mostly addressed the limitations of their work (although see below), but they did not account for the potential negative impacts. I'm not flagging it for an ethics review as it's just a small correction though.
+
+Checklist 1C: the described model can be easily adapted for face recognition. This does imply potential negative societal impacts and should be discussed by the authors, even though previous work can be used in a similar way.
+
+Related, the authors refer to practical uses throughout the whole paper, in particular when talking about performance of DONE. But it’s never discussed what those are, and why the achieved performance of the method is good enough for them.",1 poor,2 fair,2 fair,Yes
+3025,"5: Borderline accept: Technically solid paper where reasons to accept outweigh reasons to reject, e.g., limited evaluation. Please use sparingly.",3: You are fairly confident in your assessment. It is possible that you did not understand some parts of the submission or that you are unfamiliar with some pieces of related work. Math/other details were not carefully checked.,"The paper presents a method for the one-shot classification of novel inputs. For the classification of novel inputs, the method uses representations obtained by the final dense layer of a pretrained backbone model to create novel weight vectors of new classes. Importantly, DONE does not optimize or change the backbone model in any way, making it applicable to various backbone models and computationally efficient.","Strengths:
+1) Introducing quantile normalization in machine learning, a method that was unknown to me.
+
+Weaknesses:
+1) The link to Hebbian learning is weak and not meaningful for this paper goals.
+2) The idea that the last dense layer of a DNN includes representations that allow novel classifications is not novel, without any model modification, is not novel (e.g., [1] analyzed it theoretically).
+3) There are many writing problems. Too many to mention them all. Examples: a. talking about the heritage of mankind in line 135 (unprofessional); b. figure 2 has an irrelevant screen cursor at the right-most data point. More importantly, essential legend details of this figure appear in the text instead of the caption, which is confusing; c. “the simplest” in line 324 is also not professional (I think that Qi’s method is simpler). 
+4) The method does not improve upon previous works Figure 2 shows that Qi’s method works similarly or better. I am not convinced that the backbone modifications it does are detrimental.
+5) Accepting the updated paper that was submitted via the supplementary materials, at a later deadline, is unfair to other authors.
+
+[1] Sorscher, B., Ganguli, S., & Sompolinsky, H. (2021). The geometry of concept learning. bioRxiv.‏","My main suggestion is that you would make a further effort to convince this method's benefits over Qi's. In the current paper, the benefits are argued in text. Try to argue using a test where Qi's modification to the backbone model impairs performance, while DONE does not.
+
+Also, I suggest adding more details about the practical implementation of quantile normalization.
+
+Finally, the paper needs to be thoroughly edited.",The paper adequately discusses the method limitations.,3 good,2 fair,3 good,Yes
+11146,"3: Reject: For instance, a paper with technical flaws, weak evaluation, inadequate reproducibility and incompletely addressed ethical considerations.",3: You are fairly confident in your assessment. It is possible that you did not understand some parts of the submission or that you are unfamiliar with some pieces of related work. Math/other details were not carefully checked.,"This paper proposes value target lower bounding to improve the Bellman value target during value function learning. The proposed method computes and utilizes a lower bound for the value target during Bellman backup, and the resulting lower-bounded Bellman operator is claimed to converge to the same optimal value as using the vanilla Bellman operator in the tabular case. Additionally, the paper presents several ways of estimating the lower bound function in practice, such as using the episodic return in episodic tasks and n-step bootstrapped return in non-episodic tasks, and shows the effectiveness of value target lower bounding on several RL environments. ","Strengths:
+
+- The related work is well cited and discussed in the paper, and it is clear how this work differs from previous contributions. 
+
+- The proposed method is simple, reproducible, and compatible with most state-of-the-art RL algorithms. 
+
+
+Weaknesses:
+- There are several technical concerns in the paper. Specifically, 
+
+    - I believe the main theoretical result, Theorem 2.3, does not hold if the lower bound function $f$ is fixed (or static). In the proof, for any $s$, where $f(s) \geq v^*(s)$ and $f(s) \geq B(v)(s)$, we have
+    $$ |B_f(v)(s) – v^*(s)| = |max(B(v)(s), f(s)) – v^*(s)| = |f(s) – v^*(s)| = f(s) – v^*(s) = Constant$$
+    So, the distance to the optimal value would not shrink under the new lower-bounded Bellman operator. If $f$ is updated together with the value function during learning, please do make this clear and clearly show how $f$ is updated together with $v$ in the main paper. Based on the current presentation, Theorem 2.3 does not hold. 
+
+
+    - Results from value iteration (VI) do not directly generalize to RL settings where the transition dynamics and the reward function are unknown to the RL agent. This leads to a fundamental problem in RL that does not exist in VI, exploration vs. exploitation. However, the paper did not mention or address/discuss the exploration problem when transitioning from VI to RL, and thus the proposed method is not well justified in the RL setting.              
+
+    
+    - In general, the episodic return (or Monte Carlo estimate of the return) is not guaranteed to be a lower bound of the optimal value (or the expected return following an optimal policy). Although the authors mentioned this in Section 6 (Related Works) as the limitation of their work, it is still concerning to me in terms of the soundness and the algorithmic design of the proposed method.                
+
+
+- The clarity of the paper could be further improved, and the paper needs to be better organized in my opinion. I encourage the authors to move key results and plots to the main paper. Putting all experimental figures in the appendix would jeopardize the readability of the paper.     
+
+
+Overall, the paper feels more like a work in progress to me, and certain technical details may need a bit rework and the paper could be better organized. Unfortunately, I don’t think the current version can be accepted and vote for rejection. ","Questions & Suggestions:
+
+
+1. [Technical Part]
+
+
+- 1.a. Please check Theorem 2.3. If $f$ is updated during training, please include the update rule/equation for $f$ in the main paper and in Algorithm 1.          
+
+
+- 1.b. Value iteration (VI) results do not directly generalize to RL settings and are not sufficient to rigorously justify performance in RL in my opinion. The authors may refer to Rmax [1] or randomized value function [2] for examples of rigorous analysis in the RL setting. 
+
+
+- 1.c. Exploration is crucial for efficient/faster RL. In the example of Section 4.3, it would be more interesting to discuss for instance how value target lower bounding may help the agent reach the target state faster (with fewer number of episodes of training). Propagating the value back is a less interesting problem once the target state has been reached.                            
+
+
+2. [Clarity]
+
+
+- 2.a. In the actual implementation, is the lower bound function $f(s)$ fixed? or being constantly updated? It seems that the observed episodic return is written into the buffer and read out during training as the lower bound. So, $f(s)$ is updated by the newly-observed episodic return? Please try to clarify this in the paper revision.    
+
+
+- 2.b. Is a larger value always a better Bellman target? Breakout in Figure 2 and 3 could be a good counter-example. In Figure 3, lb­-DR on Breakout shows consistently 25-30% larger value targets than the baseline, which is also the highest percentage among all the 20 environments. However, the performance of lb-DR is much worse than the baseline (and I believe Breakout is a deterministic environment where the proposed lower-bounding should apply based on the claims in the paper). Further investigation is needed to better understand when lower bounding the target is helpful.         
+
+
+[1] Brafman, Ronen I., and Moshe Tennenholtz. ""R-max-a general polynomial time algorithm for near-optimal reinforcement learning."" Journal of Machine Learning Research 3.Oct (2002): 213-231.
+
+[2] Osband, Ian, et al. ""Deep Exploration via Randomized Value Functions."" J. Mach. Learn. Res. 20.124 (2019): 1-62.     
+
+
+
+","The authors have mentioned the limitation of their work in Section 6, and I would encourage the authors to discuss a bit more on scenarios where the proposed lower-bounding method may fail, e.g., why the performance is poor on Breakout? The potential negative societal impact has not been discussed in the paper. As an illustrative example, what if the algorithm was used by a malicious user to build a robot? Targeting tasks with (sparse) rewards that lead to some harmful behaviors for a society? I believe such kind of scenario could be discussed. In addition, what can and should be done to prevent it from happening?   ",2 fair,2 fair,2 fair,Yes
+11146,"5: Borderline accept: Technically solid paper where reasons to accept outweigh reasons to reject, e.g., limited evaluation. Please use sparingly.","4: You are confident in your assessment, but not absolutely certain. It is unlikely, but not impossible, that you did not understand some parts of the submission or that you are unfamiliar with some pieces of related work.","The paper proposes value target lower bounding, where a function lower bounds the maximum achievable value is used as the target value.  Such a function admits the same convergence with the original Bellman operator but converges faster. The proposed value target lower bounding is claimed to be general and can be combined with any off-policy RL algorithms. The experiments verify this on SAC and DDPG. ","**Strengths**
+
+- The proposed method appears to be simple and effective empirically.  
+- The proposed method is evaluated in several configurations. 
+- The writing is clear and easy to follow. 
+
+**Weaknesses**
+
+- The main concern is why the proposed method is not evaluated on DQN. The proposed method is claimed to be general (""The value target lower bounds can be readily plugged into RL algorithms that regress value to a target, e.g. DQN, DDPG or SAC.""), but only evaluated on off-policy actor-critic style methods, like SAC and DDPG. Is this because it does not work well on DQN?
+- Currently, the empirical return (or n-step return) is taken as the lower bounding function, which limits the proposed method to only valid when the environment is deterministic. This is one limitation of this work. 
+- *Faster learning* is only shown empirically and intuitively. Are there theoretical results to support this claim?
+- It will be better to show the difference between the lower bounding and upper bounding (He et al., 2017).
+
+**originality and significance**
+- It is not totally new to use the bounding of target value. 
+
+---
+AFTER REBUTTAL
+
+I thank the authors for the response. After reading the response and other reviews, I think the paper still has a few weaknesses/limitations: (1) limited to deterministic environments. It is better to show how to extend it to stochastic environments; (2) better to compare it with other methods, like upper bounding. 
+
+Nevertheless, I still enjoy seeing such a simple method works well empirically. So, I keep my score.  ",Refer to above,Limitations are discussed in Section 7.,2 fair,3 good,3 good,Yes
+11146,"3: Reject: For instance, a paper with technical flaws, weak evaluation, inadequate reproducibility and incompletely addressed ethical considerations.","4: You are confident in your assessment, but not absolutely certain. It is unlikely, but not impossible, that you did not understand some parts of the submission or that you are unfamiliar with some pieces of related work.","This paper suggests that learning a lower bound of the value function can facilitate dynamic programming such enhance RL performance. The author(s) provided theoretical insights about the optimality of the value function learning with their lower bounding method. It was claimed the proposed methods showed effectiveness in a wide range of tasks.
+","Strengths:
+
+1. The proposed method seems simple but somehow effective.
+2. Novel theoretical insights about lowerbounding the value function.
+3. The author(s) carefully explained the novelty of the proposed method in Sec.6.
+
+
+However, I could not evaluate the effectiveness of the proposed methods because all the empirical results are in the appendix. Meanwhile, as I have shortly scanned the appendix, the are also other things to notice, which I will details below.
+
+I think the manuscript in its current form is not acceptable as a NeurIPS conference paper. Because the important methods (how to implement in deep RL) and experimental results are all in the appendix, as well as some other problems exist. If the authors(s) cannot include all the essential methods and results in a conference paper, I recommand to submit to a journal.
+
+Weaknesses:
+
+1. As I said, the paper should be self-contained with essential practical algorithms and experimental results in its main texts.
+2. Estimating value function has always been an vital problem in deep RL. Although the paper discussed related work about lower bounding the value function, there are other studies pointed out that Q-learning like algorithms, e.g., SAC, tend to over-estimate the value targets , which is bad and should be regularized. For example, [1][2][3] used different methods to control the over-estimating bias of SAC and observed very large performance gain. The paper should discuss the relation to them and conduct comparison to at least one of them.
+
+
+minor issue I found:
+
+line 140, ""action value"" --> ""state-action value""
+
+
+[1] Kuznetsov, Arsenii, et al. ""Controlling overestimation bias with truncated mixture of continuous distributional quantile critics."" International Conference on Machine Learning. PMLR, 2020.
+
+[2] Chen, Xinyue, et al. ""Randomized Ensembled Double Q-Learning: Learning Fast Without a Model."" International Conference on Learning Representations. 2021.
+
+[3] Hiraoka, Takuya, et al. ""Dropout Q-Functions for Doubly Efficient Reinforcement Learning."" International Conference on Learning Representations. 2022.
+
+","How to implement your method in deep RL? Because Algorithm 1 is for tabular case.
+",See Weaknesses.,2 fair,1 poor,2 fair,Yes
+11146,"3: Reject: For instance, a paper with technical flaws, weak evaluation, inadequate reproducibility and incompletely addressed ethical considerations.","4: You are confident in your assessment, but not absolutely certain. It is unlikely, but not impossible, that you did not understand some parts of the submission or that you are unfamiliar with some pieces of related work.","This paper proposes a form of target value lower bounding, which induces a new Bellman operator. The authors show the operator is a contraction, and propose several lower bounds. Extensive experiments are conducted (provided in the supplementary material) to show the performance of the proposed approach.","This paper is written clearly and the overall concept is interesting. There are several aspects of this paper that are problematic. 
+
+First, theoretically, the paper is not strong. Theorem 2.3 does not present any interesting new theory, and it is unclear why this result is important. The authors do not show or prove any benefit of using the bounded Bellman operator. When would this operator be useful for cases that don't bound $G_\infty$? It would seem that due to over-optimism of the Bellman operator, $G_0$ will usually maximize $\bar{G}$. 
+
+Second, the examples for lower bounds in the paper require deterministic environments. The lower bounds themselves feel somewhat trivial. It is unclear why these lower bounds are good. 
+
+Finally, the experiments do not show any significant improvement using the proposed approach. Also, the experiments themselves are shown only in the appendix, which should not be used to place major contributions. The authors chose to do this due to space constraints, which is not fair to other reviewed papers.
+
+Strengths:
+
+- Paper is clearly written
+- Proposed Bellman operator may be having interesting characteristics to be researched
+- Authors conducted extensive experiments
+
+Weaknesses:
+
+- Lack of theory, and unsure about novelty
+- Setting is limited. Examples require deterministic environments. Unsure why $\bar{G}$ is useful.
+- Experiments don't show a clear benefit of approach. Also, experiments are only provided in appendix which does not need to be evaluated for review.","- For the proposed lower bounds - are the theoretical gaps between the deterministic and non-deterministic settings?
+- When is $\bar{G}$ more beneficial than $G_\infty$
+- Why does $B_f$ improve convergence?
+- How does $B_f$ affect the overestimation problem?","The authors discuss limitations of their work. Particularly, deterministic requirements.",2 fair,3 good,2 fair,Yes
+8594,"8: Strong Accept: Technically strong paper, with novel ideas, excellent impact on at least one area, or high-to-excellent impact on multiple areas, with excellent evaluation, resources, and reproducibility, and no unaddressed ethical considerations.",3: You are fairly confident in your assessment. It is possible that you did not understand some parts of the submission or that you are unfamiliar with some pieces of related work. Math/other details were not carefully checked.,"The paper points out that minimax excess risk is lower bounded by a function of only the size of the minority group without additional parametric model assumptions or knowledge of the problem at hand. However, an undersampling + binning estimator achieves said lower bound. This implies that using samples from the majority-class/group does not improve, meaning that undersampling is optimal.",The paper targets an important problem and the paper does a very good job pointing out both why undersampling does wonders in many cases and also why further work toward improve OOD should assume more structure. Good work!,I think many existing methods do infact use more structure than is allowed by the theory in the paper. Can the authors comment on what kinds of structure in the existing OOD literature helps do better than the proved lower-bound?,See questions.,4 excellent,4 excellent,4 excellent,Yes
+8594,"7: Accept: Technically solid paper, with high impact on at least one sub-area, or moderate-to-high impact on more than one areas, with good-to-excellent evaluation, resources, reproducibility, and no unaddressed ethical considerations.","4: You are confident in your assessment, but not absolutely certain. It is unlikely, but not impossible, that you did not understand some parts of the submission or that you are unfamiliar with some pieces of related work.","The paper studies group-structured distribution shift, in which there exists an identifiable majority and minority group in the dataset. The later group having fewer samples in train time even though at test they are equally likely to be in either group. The paper looks into two specific types of this type of distribution shift. In the case in which the distribution shift is controlled via the balance of labels, the paper proves that the minimax excess risk can be lower bounded with only the size of the minority class samples. They further introduce an undersampled binning estimator which achieves this lower bound up to a constant. The paper also examines group-covariate shift, in which the distribution shift is over the marginal of a feature. In this case the minimax excess risk can be lower bounded, but also requires the ratio of samples (wrt minority / majority groups) and the overlap of group-covariate measures, alongside the size of the minority class samples. Their undersampled binning estimator also has an upper bound on the minimax excess risk, but there is a gap when there is a high overlap in the minority / majority distributions. Simple experiments are presented which are consistent with the theory.","Strength
+  - The paper presents lower bounds for the lower bounds for the minimax excess risk for label shift and group-covariate shifts.
+  - Their proposed ""Undersampled Binning Estimator"" are optimal (or optimal in certain scenarios) up to a constant.
+  - The explanations and intuition provided of the setting and results.
+
+Weakness
+  - There are a few symbols which are not defined and some components in the experiments section which are not clear.","Questions / Comments / Suggestions
+1. Is the 1-Lipschitz assumption common? It would be useful for a discussion on if this assumption appears in practice or if its is a common technical assumption.
+2. Short definitions / descriptions of $\mathrm{TV}$ and VS loss would be useful for completeness
+3. There are short notes about the generalization of Theorem 4.1 and 4.2 for higher dimensions. Does the ""1/3"" to ""1/3d"" also hold for corresponding Theorem 5.1 and 5.2?
+
+Minor / Typos
+  - There seems to be a few typos / errors in the Appendix, the set of equation below Line 483: (1) on the first line the summation seems to be misplaced; and (2) the second last line seems to be incorrect / should be removed. This doesn't invalidate the proof.
+  - In the Appendix, equations below Line 514: ""$n_{maj}$"" -> ""$ n_{min}$""",Assumptions / limitations of analysis is clear.,3 good,3 good,4 excellent,Yes
+8594,"8: Strong Accept: Technically strong paper, with novel ideas, excellent impact on at least one area, or high-to-excellent impact on multiple areas, with excellent evaluation, resources, and reproducibility, and no unaddressed ethical considerations.","4: You are confident in your assessment, but not absolutely certain. It is unlikely, but not impossible, that you did not understand some parts of the submission or that you are unfamiliar with some pieces of related work.","Motivated by the fact that undersampling the majority class remains a competitive approach to learning in the presence of class imbalance, this paper sets out to answer the following question: Is it fundamentally possible to learn a better model than that of undersampling? The paper also considers a related question pertaining to covariate shift, which I am dropping to make the summary concise. To answer this question, the authors prove a lower bound (converse bound) that shows that the number of samples needed to learn a min-max optimal classifier in this setting scales with $n^{-1/3}$. They show a matching upper bound based on undersampling based on which they conclude that undersampling is min-max optimal. The authors provide some experiments that confirm the results. Overall, I like the general positioning of the paper and the story is told nicely. However, I have serious concerns about the main theoretical results of the paper (Theorems 4.1 and 4.2) based on which I recommend the paper to be rejected given that these lower bounds are major contributions of this work.
+
+
+***** Update ******
+
+The authors clarified my concerns in the rebuttal; in particular, I can see that the proof of Thm 4.1 was suffering from a typo, and the additional details clarified my concerns about the proof of Thm 4.2. As such, I agree with the other two reviewers that this is a significant piece of work and think should be highlighted in the conference (adjusting the score to 8). ","Strengths:
+* The authors ask an important question about min-max optimality of undersampling.
+
+* The paper is nicely written, nicely exposed, and the results appear to be novel to me.
+
+* The upper bounds for undersampling are intuitive, and the analysis is nicely done.
+
+Weaknesses:
+* The main weakness of the paper lies in the constant $c$ in Theorem 4.1. A closer look at the proof on page 19, line 514, shows that the constant $c = e^{-\frac{n_{maj}}{3 n_{min}}},$ which *does* depend on both $n_{min}$ and $n_{maj}$ as opposed to the general story of the paper. In fact, $c \to 0,$ as $n_{maj} \to \infty$ which contradicts parts of the story of the paper. The only way to keep $c$ to be a constant as $n_{maj} \to \infty$ is to let $n_{min} \to \infty$ with $\frac{n_{maj}}{n_{min}} \to \eta$ for constant $\rho$ in which case the result loses its interestingness because there is no distinguishable difference between $\frac{c}{n_{min}^{1/3}} = \frac{c_2}{n_{maj}^{1/3}}$ for some other constant $c_2$ and the theorem doesn't tell us anything non-trivial about class imbalance. In summary, the lower bound is vacuous unless $\frac{n_{maj}}{n_{min}} \to \eta,$ in which case the lower bound is trivial.
+
+* A similar weakness applies to Theorem 4.2 for any $\tau \in (0,1)$, where $c$ vanishes as $n_{maj} \to \infty$. This can be seen based on the equation on line 637 which vanishes as $n_{maj} \to \infty$. Hence, similarly the lower bound is either vacuous or trivial in this setting as well.
+
+* Since the metric of interest is min-max excess risk, I wonder why the authors didn't consider a min-max baseline (instead of ERM) in this setting; Also smoothened versions of such min-max loss for better generalization, e.g., tilted loss (Li et al 2021): 
+Li, T., Beirami, A., Sanjabi, M. and Smith, V., 2021. Tilted empirical risk minimization. ICLR.
+I also wonder if these baselines would be subject to the same empirical observations of Figure 2.","* Can you please elaborate on the main weaknesses listed above with respect to the lower bounds in Theorems 4.1 and 4.2? There might be a way to fix this by updating the construction that is considered and working through the details but I was not able to immediately see a way out.
+
+* The proof of Theorems 4.1 and 4.2 are dense. It would be best to give an outline of how the proof goes first. For example, I was confused when $K$ was introduced for the first time, as it was not clear how this was going to be used.","The main limitation of this paper is that Theorems 4.1 and 4.2 in their current form are either vacuous or trivial (depending on how $n_{maj}$ is related to $n_{min}$), and hence they do not support the narrative of the paper. It is not clear to me how this might be fixed.",2 fair,3 good,3 good,Yes
+6640,"6: Weak Accept: Technically solid, moderate-to-high impact paper, with no major concerns with respect to evaluation, resources, reproducibility, ethical considerations.",3: You are fairly confident in your assessment. It is possible that you did not understand some parts of the submission or that you are unfamiliar with some pieces of related work. Math/other details were not carefully checked.,"The paper studies how weight-decayed parallel ReLU networks are able to estimate functions with heterogeneous smoothness in the Bounded Variance and Besov classes. In particular, the authors show that the weight decay in the L-th layer parallel network is equivalent to a sparse $\ell_{L/2}$ constraint and use this property with an upper bound of the covering number to bound the estimation error. The authors then provide an approximation error bound by using the B-spline basis functions as a proxy. They have shown that for a deep network, the error rate is nearly optimal. ","The paper provides the first optimal rate approximation results of a weight decay parallel ReLU network over Besov functions. The observation that the weight decay in parallel networks is equivalent to a sparse promoting constraint is interesting. It enables the control of the complexity of the model, which is characterized by the covering number in the paper. This also allows the number of subnetworks $M$ to be large without overfitting. The paper also shows that each subnetwork can adapt to functions with different local smoothness properties (different B-spline basis functions) and thus have the ability to be locally adaptive. 
+
+Weakness:
+
+1. The main complaint is that the statements of the theorems and propositions are not provided in a clear and rigorous way. Theorem 1 is confusing in the sense that it does not specify the assumption for the target function $f_0$. There seem to be two sets of function classes considered in section 2.2, the Besov spaces $B_{p, \infty}^{\alpha}$ and bounded variation space $BV(m)$. From the statement, I would assume the target function belongs to $B_{p, \infty}^{\alpha}$, is that true? And how is $m$ defined in the problem? Is $m$ to be any integer with $m > \alpha$? $r > 0$ is assumed in the statement but $r$ does not appear anywhere else in the theorem. Also, I find the statement ""with proper choice of the parameter of weight decay $\lambda$"" to be vague. It would be helpful if how $\lambda$ depends on other parameters in the theorem can be specified. The authors provided an extension version of theorem 1 in appendix F, but it does not resolve the problems above. For example, the proof also uses ""there exists a weight decay parameter \lambda'"" in line 775, which causes confusion as I would like to know how large this $\lambda$ or $\lambda'$ would be. 
+
+There are similar unclear statements in other parts of the paper. In proposition 3, the authors do not specify how $P'$ depends on the other parameters. In fact, $P'$ would depend on $\lambda$, and may not be viewed as a constant. Actually, in proposition 6, one can see that $a$ can have a large $2/L$ norm that depends exponential over $m$. In theorem 4, the notation of $\log \mathcal N(\mathcal F, \delta)$ is confusing as $\mathcal F$ is used to denote the model defined in (5) apart from the bias in the last layer. In proposition 6, $M_{m, k, s}$ is used but its definition is only shown later in proposition 7. 
+
+All these unclarities in the theorem statement (especially the ones in theorem 1 and proposition 3) make it hard to either examine the theorem or evaluate its contributions appropriately. 
+
+2. The paper uses parallel networks instead of typical neural network structures. As authors have pointed out, weight decays in the parallel networks would result in sparse promoting networks, but vanilla neural networks don't seem to have the same behavior. Also, the paper talks about approximation ability instead of that of training, and as the results rely on the homogeneity of ReLU, it is unclear whether a trained weight decay parallel network would also find a sparse solution. 
+
+3. The experiments do not support the arguments nicely. In figure 2, the nonsmooth part (the left part in figure (a)(d)) are hard to see clearly and thus impossible to tell which methods perform better. Also, for a highly oscillating function, one would need a larger number of samples to be able to fit it correctly, which may be the reason why figure (b) and (c) looks noisy. It would be helpful in plotting the relationship between the MSE and the sample sizes instead of the degree of freedom. In figure (c)(f), it is hard to see the sparsity of the subnetworks well. From the appendix, there seem to be $M = 2000$ subnetworks. It would be helpful in providing the scale of each subnetwork in total instead of plotting a few of these subnetwork outputs. 
+
+
+Typos: 
+1. equation (4) missing a parenthesis on the left-hand side
+2. the axis in figure 2 is not shown properly (""MSE"" in (b)(d) is partially covered)","1. In the extended form of theorem 1 in the appendix, the dominant term of the MSE also contains a large dependency over the depth $L$. When $L$ is large, I would assume this term to be linear in $L$. As a result, when $L$ is large, the constant term would decrease exponentially with $L$, but the first and dominant term grows linearly in $L$. I feel this cannot support the statement that deeper parallel networks achieve lower or even optimal error rates. Is there somewhere I was misleading here? 
+
+2. Related to the comments above, how large are $\lambda$ and $P'$? ",The authors have adequately addressed the limitations and potential negative societal impact of their work. ,2 fair,2 fair,2 fair,Yes
+6640,"6: Weak Accept: Technically solid, moderate-to-high impact paper, with no major concerns with respect to evaluation, resources, reproducibility, ethical considerations.",1: Your assessment is an educated guess. The submission is not in your area or the submission was difficult to understand. Math/other details were not carefully checked.,"This submission first shows the equivalence between standard weight decay and sparse penalty in the parallel neural networks. The authors then show that the estimation error rate is close to the minimax one. Finally, simulation results are provided to compare the approximation from different estimators.","This submission first shows the equivalence between standard weight decay and sparse penalty in the parallel neural networks. The authors then show that the estimation error rate is close to the minimax one. Finally, simulation results are provided to compare the approximation from different estimators.
+
+*Strengths And Weaknesses
+First I need to say that I am not an expert on the topics of this submission, and hope other reviewers with relevant background can comment more on the significance and novelty for the theoretical results.
+
+Strength:
+One interesting observation is that the authors proved that deeper models achieve smaller MSE error, and hence is closer to the minimax rate. Although this is only for the special parallel ReLU DNNs, it is still helpful to gain a better understanding on the empirical better performance of deeper models.
+
+Weakness:
+A few parts of this paper are a bit difficult to follow, and some clarification would be helpful, which are listed as follows.
+1. I am not sure how sparsity is shown in the equation in Figure 1 (b). If L \neq 2 and hence it's not an L-1 norm, how can we still obtain the sparse regression?
+
+2. The purpose of the results in Figure 2 is a bit unclear. For example, the authors claimed parallel NN achieves smaller error with deeper networks. Could you provide any results to support this claim? Furthermore, unlike wavelet denoising, why does NN tend to achieve higher MSE with higher DOF in the end of curves?",See above,Yes,3 good,3 good,3 good,Yes
+6640,"4: Borderline reject: Technically solid paper where reasons to reject, e.g., limited evaluation, outweigh reasons to accept, e.g., good evaluation. Please use sparingly.","4: You are confident in your assessment, but not absolutely certain. It is unlikely, but not impossible, that you did not understand some parts of the submission or that you are unfamiliar with some pieces of related work.","This paper studies weight decay regularized neural network training problems through the lens of nonparametric regression. The authors particularly consider a parallel architecture that is a weighted combination of multiple standard networks and show that weight decay regularization promotes Lp sparsity for the coefficients of the learned dictionary. Thus, they aim to shed light on why depth matters and the distinction between the expressive power of neural networks and kernel methods.","The paper is mostly well written and the results seem theoretically sound, however, there are some point requiring further clarifications as detailed below:","* I don’t see any theoretical reasons for studying a parallel architecture rather than a standard deep neural network. It seems that the authors already allocated a section to prove common usage of this architecture in various theoretical and empirical works. But, I still think they need to explicitly describe the reasons for choosing this specific architecture and explain why analyzing standard networks are challenging if that is the case.
+* Could the authors comment on the impact of regularizing the bias? Even though this is the common practice for numerical experiments, it might make the problem trivial when one aims to globally optimize the objective function rather than using certain optimizers, such as SGD, with benign implicit regularization effect. In other words, if the network is deep enough one can choose arbitrarily small layer weights satisfying the constraints in Proposition 1 and then optimize over biases to exactly fit the training data. 
+* It seems that this kind of a sparsity-inducing properties of weight decay regularized NNs have already been studied in [1,2]. I think the authors should comment on these studies and clarify their contributions.
+* Regarding the numerical experiments, I am wondering if the comparison between parallel NN and standard NN is fair. For instance, what is the number of parameters for each architecture? What is the depth of the networks? Which optimizer did you use? I think the authors should provide more details in the numerical experiments section.
+* Is it possible to extend this analysis to different activations, e.g., smooth activations such as tanh, sigmoid or other nonsmooth activations such as leaky ReLU, piecewise linear activations?
+* Do these conclusions apply to other NN architectures such as CNN? It seems that [3] has already proven that two-layer weight decay regularized CNNs also induce a sparsity across filters. Does this work have similar implications possibly for deeper CNNs?
+
+[1] ""Neural networks are convex regularizers: Exact polynomial-time convex optimization formulations for two-layer networks."", ICML 2020
+
+[2] ""Global optimality beyond two layers: Training deep relu networks via convex programs."" ICML 2021
+
+[3] ""Implicit convex regularizers of cnn architectures: Convex optimization of two-and three-layer networks in polynomial time."" ICLR 2020
+
+",This is mostly a theory paper on neural networks therefore doesn't have any negative societal impacts.,2 fair,2 fair,2 fair,Yes
+6640,"5: Borderline accept: Technically solid paper where reasons to accept outweigh reasons to reject, e.g., limited evaluation. Please use sparingly.","4: You are confident in your assessment, but not absolutely certain. It is unlikely, but not impossible, that you did not understand some parts of the submission or that you are unfamiliar with some pieces of related work.","1. This paper considers the mean regression using the parallel ReLU activated neural networks.
+
+2. This papers observes that the training is equivalent to $\ell_p$ sparse regression with a learned basis.
+
+3. The paper establishes the error bound for MSE($\hat f$), which almost achieves the minimax rate of a Besov class when the depth $L$ is large.","Originality: The connection between deep learning and nonparametric statistics is an important question. The recent papers by Parhi and Nowak (2021) and Suzuki (2018) are inspiring. This paper combines a couple of previous techniques and provides some promising results.
+
+Quality: This is a theoretical paper and it is technical sound. The claims are well supported.
+
+Clarity: The submission is clearly written and well organized. 
+
+Significance: The results are important. However, the experiment section is not very convincible. The practical usage of proposed method is questionable.","1. The method highly depends on parallel networks. This is different with general usage of DNNs. So the conclusion of this paper cannot address the success of deep learning in a general way.
+
+2. It is not very intuitive that the $\ell_p$ sparse regression with a learned basis can adapt to unknown smoothness. Can the authors use the results from Parhi and Nowak (2021) to address further properties of each learned basis?
+
+3. The paper claims that their regression problem has a fixed design, so data points are not iid. Can you clarify the meaning of this? Do iid data points make the problem easier?
+
+4. The numerical experiments are over-simplified and only consider the 1d regression. For example, for an easy MNIST dataset, how large $M$ should we use?
+",There is no potential negative societal impact of their work.,3 good,3 good,3 good,Yes
