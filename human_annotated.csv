@@ -1,24 +1,87 @@
-,human_subjectivity,computer_subjectivity,huaman_polarity,computer_polarity
-section 1,3,0.45625,4,-0.0515625
-section 2,3,0.660952381,3,0.04523809524
-section 3,4,0.453030303,5,0.1192424242
-section 4,4,0.475,4,0.1666666667
-section 5,3,0.428,5,0.112
-section 6,3,0.68,2,0.06
-section 7,3,0.45625,4,-0.0515625
-section 8,3,0.1214285714,3,-0.03571428571
-section 9,3,0.428,5,0.112
-section 10,3,0.660952381,3,0.04523809524
+,huaman_polarity,computer_polarity,human_subjectivity,computer_subjectivity
+section 1,4,0,3,0
+section 2,4,0.1566666667,3,0.3105555556
+section 3,5,0.1192424242,3,0.453030303
+section 4,4,0.2855555556,4,0.4344444444
+section 5,4,0.08571428571,3,0.3
+section 6,3,0.002380952381,5,0.3861904762
+section 7,4,0.175,3,0.15
+section 8,4,0.06363636364,3,0.2454545455
+section 9,4,-0.08484848485,3,0.3949494949
+section 10,4,0.1666666667,3,0.5085497835
 ,,,,
 ,,,,
 ,,,,
-section 1,"6: Weak Accept: Technically solid, moderate-to-high impact paper, with no major concerns with respect to evaluation, resources, reproducibility, ethical considerations.",,,
-section 2,"4: You are confident in your assessment, but not absolutely certain. It is unlikely, but not impossible, that you did not understand some parts of the submission or that you are unfamiliar with some pieces of related work.",,,
+section 1,"This paper proposes an approach to incorporate preference feedback for meta-RL, as opposed to assuming access to dense environment rewards. This takes the form of querying the oracle for ranking two trajectories, and the method leverages ideas from information theory (berlekamp volume) to deal with noise in oracle feedback. The method is evaluated on 6 gym meta-RL benchmark tasks.",,,
+section 2,"Strengths: 
+* The setting of adaptation without dense rewards is useful because it meta-RL more practically applicable.
+* The connection between preference-based adaptation in meta-RL and Rényu-Ulam’s game is novel to my knowledge, and brings information-theoretic tools (specifically, the Berlekamp volume) to bear on the design of the algorithm. This is a useful contribution.
+* The experiments demonstrate improvement due to use of the BVol-based query proposal.
+* The paper is well-written, being organized, clear, and generally well-motivated.
+
+Weaknesses:
+* The paper would benefit from a bit more explanation of the formula for Berlekamp’s volume, since most readers will not be familiar with it.
+* Another useful comparison would be ordinary PEARL using the dense rewards. (I guess you do not even have to re-run it; just use their published results.) This essentially serves as an (unattainable) upper bound on the performance we could expect with a PEARL-like adaptation algorithm, and the gap would show how much is lost by using the preference-based feedback.",,,
 section 3,"This work considers a new few-shot meta-RL setting, where the agent does not observe rewards during its few shots on a new task, but instead submits pairs of trajectories to a preference oracle, which returns which of the two trajectories is preferred (i.e., would achieve higher returns). The idea is that querying a preference oracle may require less supervision than obtaining reward labels on these trajectories. Then, to solve this setting, this work proposes a new method for task inference, where a preference predictor is learned to imitate the preference oracle, and then the task is inferred by performing an error-tolerant form of binary search with the preference predictor: the idea is to find a task under which the preference predictor most agrees with the preference oracle. This work evaluates the proposed method on standard MuJoCo meta-RL tasks, where only the reward function changes between tasks, and finds that the proposed method outperforms vanilla PEARL (which is not designed to handle this setting). Furthermore, the experiments show that adding error tolerance to the binary search procedure is important when the oracle includes noise.",,,
-section 4,"I'd like to recommend including real-human experiments. Because real humans can show various irrationality and have an inductive bias in decision making, the trends on real humans can be different from synthetic preferences. Therefore, it would be nice if the authors could include real human experiments.",,,
-section 5,"7: Accept: Technically solid paper, with high impact on at least one sub-area, or moderate-to-high impact on more than one areas, with good-to-excellent evaluation, resources, reproducibility, and no unaddressed ethical considerations.",,,
-section 6,"2: You are willing to defend your assessment, but it is quite likely that you did not understand the central parts of the submission or that you are unfamiliar with some pieces of related work. Math/other details were not carefully checked.",,,
-section 7,"6: Weak Accept: Technically solid, moderate-to-high impact paper, with no major concerns with respect to evaluation, resources, reproducibility, ethical considerations.",,,
-section 8,"6: Weak Accept: Technically solid, moderate-to-high impact paper, with no major concerns with respect to evaluation, resources, reproducibility, ethical considerations.",,,
-section 9,"7: Accept: Technically solid paper, with high impact on at least one sub-area, or moderate-to-high impact on more than one areas, with good-to-excellent evaluation, resources, reproducibility, and no unaddressed ethical considerations.",,,
-section 10,"4: You are confident in your assessment, but not absolutely certain. It is unlikely, but not impossible, that you did not understand some parts of the submission or that you are unfamiliar with some pieces of related work.",,,
+section 4,"# Strength
+
+* Interesting research problem: Meta-RL with preference-based learning is a very interesting research problem, which can be useful for utilizing RL in challenging domains. 
+
+* Clear writing: the paper is well-written and easy to follow. 
+
+* Interesting connection to Rényi-Ulam’s game & technique of Berlekamp’s volume to generate queries.
+
+# Weakness
+
+* Lack of real human experiments
+
+* Lack of comparison with several baselines
+
+# Overall
+
+The paper is well-written and the proposed method sounds reasonable. However, more experiments are required to make this work more interesting. My recommendation is ""boardline accept"".",,,
+section 5,"The authors propose Globally Gated Deep Linear Networks (GGDLNs), which is a variant of Gated Linear Networks (GLNs) that is more amenable to theoretical analysis. The paper presents a wide breadth of theoretical results, which are additionally supported by simulations.  These include bias & variance analysis for single-layer networks, kernel normalization analysis for multi-layer networks, and multi-task learning.",,,
+section 6,"The formalism in Fig1 is different from the one used in the equations.
+For example $x_i^L$ in Figure and $x_{L, i}$ in the equation
+
+The Fig1(a) should be improved because it is not so clear. Some suggestions:
+- the number of neurons at layer L and L-1 are not explicit (it should be N for all layers right?)
+- it is not clear that $W_{i0}^m$ ...  $W_{iN}^m$ are: the connections between the m-th dendrite of i-th neuron and the neurons 0...N in the previous layer. Maybe the other connections could be depicted with dashed line and focus only on the part important for the computation in Eq.1.
+- it is necessary to define also the layer. In the equation (1), in fact, the authors use $W_{L,ij}^m$. 
+- $x$ is a vector I suggest to use the proper style (e.g. bold, $\mathbf{x}$) in the figure and throughout the paper.
+
+Since, based on my understanding, $a_{i,m}$ is the i-th element of $\mathbf{a_m}$, maybe is more coherent with other approaches in eq.1 to use $a_{m,i}$. However the authors should use a formalism and be coherent throughout the paper
+
+Equation (1) what are the limits of j in the summation?
+
+row 79 --> I didn't understand the formalism. What are $m_1$, $m_2$, etc. What is the meaning of the summation? Maybe I understood the sense but the formalism is not clear neither introduced before.
+
+If I understood well, the parameters are learned maximizing the posterior probability in (3) [as described rows 143-145] but in rows 87-101 is not clearly stated this.
+
+row 118 and Appendix C4 --> Is the network defined in Figure 1 trained using GD as comparison? 
+
+What do you mean as ReLU Teacher task and what do the student network is supposed to do?
+
+The caption of Figure 2 is not clear. I suggest to use bold style for (a), (b), (c), and (d) when the successive text is related to them because, as now, the caption is confusing. I suggest to review all the captions because this problem is common.
+
+row 163-174 : What do you mean with localized receptive fields for the gatings? I didn't understand this part. Could you clarify it?
+
+I didn't understand the rationale behind the comparison of a learning using the proposed approach and the GD learning approach. 
+Why does these modalities should behave the same? Also the authors said that ""While we do not expect our theory to agree with GD dynamics quantitatively, as we will show, our theory makes accurate qualitative predictions for GD dynamics in all examples throughout this paper."". 
+What do author mean with qualitative? The shapes are different and maybe it is not a big deal because the modalities are different. Instead it is important to demonstrate that the proposed approach has a good performance on several tasks (not necessary outperform GD but that accomplish a given task as described in rows 185-201) but the rationale behind the experimental setting is not clear to me.
+
+Section 5 looks like a separated part that could deserve a paper itself. Maybe I remove it and devote more space to clarifications, descriptions, assumption, discussion, etc.
+
+The Discussion section looks like a Conclusion paragraph.",,,
+section 7,"This paper presents a theoretical framework that studies Shapley value in the context of Markov Games as a useful technique for value factorization and credit assignment in agents coalitions. Leveraging this framework, the authors proposed Shapley Q-Learning (SHAQ) derived from a novel definition of a Shapley-Bellman Operator. The proposed algorithm is compared with a suite of existing algorithms (COMA, VDN, QMIX) in predator-prey and the StarCraft MA Challenge, contrasting competitive results while showing interesting properties of interpretability.",,,
+section 8,"The paper presents a new framework and corresponding algorithm to solve value factorization in global reward games. Specifically, it derives the Shapley-Bellman optimality equation from evaluating the optimal Markov Shapley value and proposes the Shapley-Bellman operator to solve it, which is also proved in the paper. Furthermore, Shapley Q-learning is presented to implement the theoretical framework for predator-prey and SMAC environments. 
+
+Contributions: The paper proposes a new theoretical cooperative game framework and Shapley Q-learning algorithm for solving global reward games. Moreover, the authors give proof for the theoretical framework and evaluate SHAQ on Predator-Prey and StarCraft tasks, which shows good performance and interpretability. ",,,
+section 9,"The paper considers multiagent reinforcement learning in a global (cooeprative) reward game. It contrasts the results value factorization frameworks, and proposes an alternative via the Shapley value from cooperative game theory. Basically, the authors consider a form of game with coalition structures, and apply the Shapley value to decompose the reward, and derive and Shapley-Bellman optimiality equation (SBOE) corresponding to the optimal joint determinisitic policy. They propose a Shapley-Bellman opeator (SBO) that solves for the SBOE. These finally give rise to a new multiagent reinforcement learning algorithm, called Shapley Q learning, SHAQ for short,  somewhat akin to existing value factorization methods. 
+
+Empirically, on a few settings (predator-prey and starcraft)  SHAQ exhibits better performance than existing approaches, and also provides some interpertability foundation. ",,,
+section 10,"This paper studies the proportionally fair optimization problem (i.e., $\max f(x) = \sum_i \log x_i$) under packing constraints ($A x \leq 1$ for a matrix A of nonnegative entries). The main contribution is a distributed accelerated algorithm for fair packing. The algorithm is width independent and produces (additively) approximate solutions for both primal and dual.
+
+Width is defined as max ratio of positive entries in the matrix A. First order width-dependent methods don't readily lead to polynomial-time algorithms because smoothness constants do not scale logarithmically with width. In addition, approximate solutions of primal and dual are not easily translatable. In light of this, designing width-independent approximation algorithms for both primal and dual sounds challenging.
+
+This is done by extending a general technique for packing LPs and exploiting problem structure to design a distributed algorithm. Distributed width-independent algorithms for general packing LPs are not yet known. Unlike prior work, the new algorithm is determinstic, has additive (not multiplicative) error, and uses a different regularization. The new algorithm uses $O(n/\epsilon)$ iterations, a factor n smaller than the best prior method.",,,
